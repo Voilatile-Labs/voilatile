@@ -1,9 +1,10 @@
-import "./style/globals.css";
+import "../style/globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import WalletProvider from "./containers/wallet-provider";
+import WalletProvider from "./_containers/wallet-provider";
+import { TokenPriceProvider } from "./_containers/token-price-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,7 +22,9 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
-        <WalletProvider>{children}</WalletProvider>
+        <WalletProvider>
+          <TokenPriceProvider>{children}</TokenPriceProvider>
+        </WalletProvider>
       </body>
     </html>
   );
