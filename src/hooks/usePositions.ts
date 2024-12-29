@@ -132,51 +132,42 @@ export const usePositions = (address: string, contractAddress: string) => {
         const longPositions: PositionData[] = allPositions
           .slice(0, nextLongId)
           .map((data, index) => {
-            if (data) {
-              const item = data.result as any;
-
-              return {
-                positionId: index,
-                type: "long",
-                tickIndex: Number(item?.[0] || 0),
-                entryBlockNumber: BigInt(item?.[1] || 0),
-                expirationBlockNumber: BigInt(item?.[2] || 0),
-                amount: BigInt(item?.[3] || 0),
-                qTokensEarned: BigInt(item?.[4] || 0),
-              };
-            }
+            const item = data.result as any;
+            return {
+              positionId: index,
+              type: "long",
+              tickIndex: Number(item?.[0] || 0),
+              entryBlockNumber: BigInt(item?.[1] || 0),
+              expirationBlockNumber: BigInt(item?.[2] || 0),
+              amount: BigInt(item?.[3] || 0),
+              qTokensEarned: BigInt(item?.[4] || 0),
+            } as PositionData;
           })
           .filter((item) => item && item.amount > 0);
 
         const shortPositions: PositionData[] = allPositions
           .slice(nextLongId, nextLongId + nextShortId)
           .map((data, index) => {
-            if (data) {
-              const item = data.result as any;
-
-              return {
-                positionId: index,
-                type: "short",
-                tickIndex: Number(item?.[0] || 0),
-                amount: BigInt(item?.[1] || 0),
-              };
-            }
+            const item = data.result as any;
+            return {
+              positionId: index,
+              type: "short",
+              tickIndex: Number(item?.[0] || 0),
+              amount: BigInt(item?.[1] || 0),
+            } as PositionData;
           })
           .filter((pos) => pos && pos.amount > 0);
 
         const liquidityPositions: PositionData[] = allPositions
           .slice(nextLongId + nextShortId)
           .map((data, index) => {
-            if (data) {
-              const item = data.result as any;
-
-              return {
-                positionId: index,
-                type: "liquidity",
-                tickIndex: Number(item?.[0] || 0),
-                amount: BigInt(item?.[1] || 0),
-              };
-            }
+            const item = data.result as any;
+            return {
+              positionId: index,
+              type: "liquidity",
+              tickIndex: Number(item?.[0] || 0),
+              amount: BigInt(item?.[1] || 0),
+            } as PositionData;
           })
           .filter((pos) => pos && pos.amount > 0);
 

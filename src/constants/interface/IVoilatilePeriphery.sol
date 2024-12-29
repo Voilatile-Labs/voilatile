@@ -71,23 +71,28 @@ interface IVoilatilePeriphery {
     function createVoilaPool(address _principalToken, address _quoteToken, int256 atm) external;
     //@notice change the Voila pool. Only the owner can call this function
     function changeVoilaPool(address _principalToken, address _quoteToken) external;
+
     //@notice buy a new position
     function buy(int256 _tickIndex, uint128 _amount) external returns(uint256 positionId);
+
     //@notice sell the entire position
     function sell(uint256 positionId) external ;
+
     //@notice extend an existing position
     function extend(bytes32 positionId) external;
+
     //@notice create a new short-sell position
     function ss(int256 _tickIndex, uint128 _amount) external returns (uint256 positionId);
+
     //@notice close the entire short-sell position
     function ssClose(int256 _tickIndex) external;
+
     //@notice create a new LP position
     function LP(int256 _tickIndex, uint128 _amount) external returns (uint256 positionId);
+
     // @notice close the entire position
     function LPclose(int256 _tickIndex) external;
+
     // @notice calibrate the ATM tick with Uniswap's tick 
     function atmSwap(uint256 iterations) external;
-
-
-
 }

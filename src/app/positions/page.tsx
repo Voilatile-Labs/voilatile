@@ -81,11 +81,13 @@ const Positions = ({}: PositionsProps) => {
                   shortToken={testShortToken}
                   feeTier={testFeeTier}
                   position={{
+                    type: position.type,
                     tick: position.tickIndex,
                     amount: position.amount,
                     startBlockNumber: position.entryBlockNumber,
                     endBlockNumber: position.expirationBlockNumber,
                     payout: position.qTokensEarned,
+                    positionId: position.positionId,
                   }}
                 />
               ))}

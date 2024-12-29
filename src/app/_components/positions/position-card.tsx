@@ -6,17 +6,24 @@ import { Token } from "@/constants/token";
 import Image from "next/image";
 import { tokenAmountToDecimal } from "@/utils/currency";
 import { formatePercentage } from "@/utils/number";
+import { useAccount } from "wagmi";
+import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
+import TransactionModal from "./transaction-modal";
+import { Button } from "@/components/ui/button";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 interface PositionCardProps {
   longToken: Token;
   shortToken: Token;
   feeTier: number;
   position: {
+    type: string;
     tick: number;
     amount: bigint;
     startBlockNumber?: bigint;
     endBlockNumber?: bigint;
     payout?: bigint;
+    positionId: number;
   };
 }
 
@@ -27,6 +34,71 @@ const PositionCard = ({
   position,
 }: PositionCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [openTransactionModal, setOpenTransactionModal] = useState(false);
+  const [transactionData, setTransactionData] = useState<any>(null);
+
+  const { address } = useAccount();
+  const { openConnectModal } = useConnectModal();
+
+  const extend = async () => {
+    setTransactionData({
+      contract: {
+        address: process.env
+          .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
+        abi: VoilatilePeripheryABI,
+        functionName: "extend",
+        args: [position.positionId],
+      },
+      title: "Extend Position",
+      description: "Are you sure you want to extend this position?",
+    });
+    setOpenTransactionModal(true);
+  };
+
+  const sell = async () => {
+    setTransactionData({
+      contract: {
+        address: process.env
+          .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
+        abi: VoilatilePeripheryABI,
+        functionName: "sell",
+        args: [position.positionId],
+      },
+      title: "Close Position",
+      description: "Are you sure you want to close this position?",
+    });
+    setOpenTransactionModal(true);
+  };
+
+  const ssClose = async () => {
+    setTransactionData({
+      contract: {
+        address: process.env
+          .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
+        abi: VoilatilePeripheryABI,
+        functionName: "ssClose",
+        args: [position.tick],
+      },
+      title: "Close Short Position",
+      description: "Are you sure you want to close this short position?",
+    });
+    setOpenTransactionModal(true);
+  };
+
+  const lpClose = async () => {
+    setTransactionData({
+      contract: {
+        address: process.env
+          .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
+        abi: VoilatilePeripheryABI,
+        functionName: "LPclose",
+        args: [position.tick],
+      },
+      title: "Close LP Position",
+      description: "Are you sure you want to close this LP position?",
+    });
+    setOpenTransactionModal(true);
+  };
 
   return (
     <div className="border rounded-xl shadow-sm hover:shadow transition-shadow p-4">
@@ -154,8 +226,67 @@ const PositionCard = ({
               </div>
             </div>
           )}
+
+          {address ? (
+            <>
+              {position.type === "long" && (
+                <div className="flex gap-2 mt-4">
+                  <Button onClick={extend} variant="outline" className="flex-1">
+                    Extend
+                  </Button>
+                  <Button
+                    onClick={sell}
+                    variant="destructive"
+                    className="flex-1"
+                  >
+                    Close
+                  </Button>
+                </div>
+              )}
+
+              {position.type === "short" && (
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    onClick={ssClose}
+                    variant="destructive"
+                    className="flex-1"
+                  >
+                    Close
+                  </Button>
+                </div>
+              )}
+
+              {position.type === "liquidity" && (
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    onClick={lpClose}
+                    variant="destructive"
+                    className="flex-1"
+                  >
+                    Close
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <Button
+              onClick={openConnectModal}
+              className="rounded-xl w-full mt-4 h-12 text-base"
+            >
+              Connect
+            </Button>
+          )}
         </div>
       )}
+
+      <TransactionModal
+        isOpen={openTransactionModal}
+        onSuccess={() => {
+          setOpenTransactionModal(false);
+        }}
+        onClose={() => setOpenTransactionModal(false)}
+        data={transactionData}
+      />
     </div>
   );
 };
