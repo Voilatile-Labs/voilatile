@@ -46,10 +46,7 @@ export function TokenPriceProvider({ children }: TokenPriceProviderProps) {
 
   useEffect(() => {
     if (data) {
-      setTokenPriceMap({
-        data,
-        updatedAt: new Date(),
-      });
+      setTokenPriceMap(data);
     }
   }, [data, setTokenPriceMap]);
 

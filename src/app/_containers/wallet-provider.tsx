@@ -9,15 +9,15 @@ interface WalletProviderProps {
   children: React.ReactNode;
 }
 
+export const config = getDefaultConfig({
+  appName: "Voilatile",
+  projectId: process.env.NEXT_PUBLIC_WEB3_PROJECT_ID as string,
+  chains: [optimism, sepolia],
+  ssr: true,
+});
+
 const WalletProvider = ({ children }: WalletProviderProps) => {
   const queryClient = new QueryClient();
-
-  const config = getDefaultConfig({
-    appName: "Voilatile",
-    projectId: process.env.NEXT_PUBLIC_WEB3_PROJECT_ID as string,
-    chains: [optimism, sepolia],
-    ssr: true,
-  });
 
   return (
     <WagmiProvider config={config as Config}>

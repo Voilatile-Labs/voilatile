@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useGlobalStore from "@/stores/global/global-store";
+import useGlobalStore, { UserPosition } from "@/stores/global/global-store";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const sortOptions = [
@@ -23,19 +23,23 @@ const SelectPositionHeader = () => {
     <div className="flex flex-col gap-2">
       <Tabs
         value={positionType}
-        onValueChange={(value) =>
-          setPositionType(value as "long" | "short" | "liquidity")
-        }
+        onValueChange={(value) => setPositionType(value as UserPosition)}
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-3 rounded-xl">
-          <TabsTrigger value="long" className="text-xs rounded-lg">
+          <TabsTrigger value={UserPosition.LONG} className="text-xs rounded-lg">
             Long
           </TabsTrigger>
-          <TabsTrigger value="short" className="text-xs rounded-lg">
+          <TabsTrigger
+            value={UserPosition.SHORT}
+            className="text-xs rounded-lg"
+          >
             Short
           </TabsTrigger>
-          <TabsTrigger value="liquidity" className="text-xs rounded-lg">
+          <TabsTrigger
+            value={UserPosition.LIQUIDITY}
+            className="text-xs rounded-lg"
+          >
             Liquidity
           </TabsTrigger>
         </TabsList>

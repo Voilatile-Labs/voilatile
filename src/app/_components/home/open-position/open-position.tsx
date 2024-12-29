@@ -8,13 +8,30 @@ import SelectTokenPair from "./select-token-pair";
 import SelectFeeTier from "./select-fee-tier";
 import { useAccount } from "wagmi";
 import SelectPosition from "../position-selector/select-position";
-import SelectStrikePrice from "./select-strike-price";
+import SelectStrikePrice, {
+  priceToTick,
+  tickToPrice,
+} from "./select-strike-price";
+import { calculateTokenTick } from "@/utils/currency";
+import { formatNumberWithDecimals } from "@/utils/number";
 
 const OpenPosition = () => {
   const { openConnectModal } = useConnectModal();
   const { address } = useAccount();
 
-  const { setStep } = useGlobalStore();
+  const {
+    setStep,
+    longToken,
+    shortToken,
+    tokenPriceMap,
+    setLongToken,
+    setShortToken,
+    setLongTokenAmount,
+    setShortTokenAmount,
+    setTick,
+    tick,
+    longTokenAmount,
+  } = useGlobalStore();
 
   return (
     <div className="w-full">
@@ -39,6 +56,31 @@ const OpenPosition = () => {
             type="long"
             allowTokenChange={false}
             usdLabel="Position size:"
+            onTokenSelect={(token) => {
+              if (shortToken?.contractAddress === token.contractAddress) {
+                setShortToken(null);
+              }
+              setLongToken(token);
+
+              if (tokenPriceMap && longToken && shortToken) {
+                const value = calculateTokenTick(
+                  tokenPriceMap,
+                  longToken,
+                  shortToken
+                );
+                setTick(value);
+              }
+            }}
+            onAmountChange={(value) => {
+              if (longToken) {
+                setLongTokenAmount(value);
+
+                const amount = Number(value) / tickToPrice(tick);
+                setShortTokenAmount(
+                  formatNumberWithDecimals(amount, 6).toString()
+                );
+              }
+            }}
           />
         </div>
 
@@ -48,7 +90,44 @@ const OpenPosition = () => {
 
         <div className="w-full">
           <h3 className="text-xs font-medium mb-2">Deposit Amount</h3>
-          <SelectPosition type="short" allowTokenChange={false} />
+          <SelectPosition
+            type="short"
+            allowTokenChange={false}
+            onTokenSelect={(token) => {
+              if (longToken?.contractAddress === token.contractAddress) {
+                setLongToken(null);
+              }
+              setShortToken(token);
+
+              if (tokenPriceMap && longToken && shortToken) {
+                const value = calculateTokenTick(
+                  tokenPriceMap,
+                  longToken,
+                  shortToken
+                );
+                setTick(value);
+              }
+            }}
+            onAmountChange={(value) => {
+              if (shortToken) {
+                setShortTokenAmount(value);
+
+                if (longToken && longTokenAmount) {
+                  const longTokenPrice = tokenPriceMap[longToken.searchId] || 1;
+                  const shortTokenPrice =
+                    tokenPriceMap[shortToken.searchId] || 1;
+
+                  const PAmount = Number(longTokenAmount) * shortTokenPrice;
+                  const QAmount = Number(value) * longTokenPrice;
+
+                  const price = PAmount / QAmount;
+
+                  const tick = priceToTick(price);
+                  setTick(tick);
+                }
+              }
+            }}
+          />
         </div>
       </div>
 

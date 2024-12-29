@@ -1,6 +1,12 @@
 import { create } from "zustand";
 
-import { Token } from "@/constants/token";
+import { data as Tokens, Token } from "@/constants/token";
+
+export enum UserPosition {
+  LONG = "long",
+  SHORT = "short",
+  LIQUIDITY = "liquidity",
+}
 
 interface GlobalStore {
   step: "select-token" | "open-position";
@@ -18,20 +24,17 @@ interface GlobalStore {
   shortTokenAmount: string;
   setShortTokenAmount: (shortTokenAmount: string) => void;
 
-  strikePrice: number;
-  setStrikePrice: (strikePrice: number) => void;
+  tick: number;
+  setTick: (tick: number) => void;
 
   fee: number;
   setFee: (fee: number) => void;
 
-  tokenPriceMap: { data: Record<string, number>; updatedAt: Date };
-  setTokenPriceMap: (tokenPriceMap: {
-    data: Record<string, number>;
-    updatedAt: Date;
-  }) => void;
+  tokenPriceMap: Record<string, number>;
+  setTokenPriceMap: (tokenPriceMap: Record<string, number>) => void;
 
-  positionType: "long" | "short" | "liquidity";
-  setPositionType: (positionType: "long" | "short" | "liquidity") => void;
+  positionType: UserPosition;
+  setPositionType: (positionType: UserPosition) => void;
 
   sortBy: "createdAt" | "expiryDate" | "fundingFee";
   setSortBy: (sortBy: "createdAt" | "expiryDate" | "fundingFee") => void;
@@ -41,10 +44,10 @@ const useGlobalStore = create<GlobalStore>((set) => ({
   step: "select-token",
   setStep: (step: "select-token" | "open-position") => set({ step }),
 
-  longToken: null,
+  longToken: Tokens[0],
   setLongToken: (longToken: Token | null) => set({ longToken }),
 
-  shortToken: null,
+  shortToken: Tokens[1],
   setShortToken: (shortToken: Token | null) => set({ shortToken }),
 
   longTokenAmount: "",
@@ -53,21 +56,18 @@ const useGlobalStore = create<GlobalStore>((set) => ({
   shortTokenAmount: "",
   setShortTokenAmount: (shortTokenAmount: string) => set({ shortTokenAmount }),
 
-  strikePrice: 0,
-  setStrikePrice: (strikePrice: number) => set({ strikePrice }),
+  tick: 0,
+  setTick: (tick: number) => set({ tick }),
 
   fee: 0,
   setFee: (fee: number) => set({ fee }),
 
-  tokenPriceMap: { data: {}, updatedAt: new Date() },
-  setTokenPriceMap: (tokenPriceMap: {
-    data: Record<string, number>;
-    updatedAt: Date;
-  }) => set({ tokenPriceMap }),
+  tokenPriceMap: {},
+  setTokenPriceMap: (tokenPriceMap: Record<string, number>) =>
+    set({ tokenPriceMap }),
 
-  positionType: "long",
-  setPositionType: (positionType: "long" | "short" | "liquidity") =>
-    set({ positionType }),
+  positionType: UserPosition.LONG,
+  setPositionType: (positionType: UserPosition) => set({ positionType }),
 
   sortBy: "createdAt",
   setSortBy: (sortBy: "createdAt" | "expiryDate" | "fundingFee") =>

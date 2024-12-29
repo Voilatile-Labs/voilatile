@@ -7,12 +7,15 @@ import { useState } from "react";
 import SelectTokenModal from "./select-token-modal";
 import useGlobalStore from "@/stores/global/global-store";
 import Image from "next/image";
+import { Token } from "@/constants/token";
 
 interface SelectPositionProps {
   label?: string;
   type: "long" | "short";
   allowTokenChange?: boolean;
   usdLabel?: string;
+  onTokenSelect: (token: Token) => void;
+  onAmountChange: (value: string) => void;
 }
 
 const SelectPosition = ({
@@ -20,28 +23,18 @@ const SelectPosition = ({
   type,
   allowTokenChange = true,
   usdLabel,
+  onTokenSelect,
+  onAmountChange,
 }: SelectPositionProps) => {
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
 
-  const {
-    longToken,
-    setLongToken,
-    shortToken,
-    setShortToken,
-    longTokenAmount,
-    setLongTokenAmount,
-    shortTokenAmount,
-    setShortTokenAmount,
-  } = useGlobalStore();
+  const { longToken, shortToken, longTokenAmount, shortTokenAmount } =
+    useGlobalStore();
 
-  const onAmountChange = (value: string) => {
+  const handleAmountChange = (value: string) => {
     const regex = /^[0-9]*\.?[0-9]*$/;
     if (value === "" || regex.test(value)) {
-      if (type === "long") {
-        setLongTokenAmount(value);
-      } else {
-        setShortTokenAmount(value);
-      }
+      onAmountChange(value);
     }
   };
 
@@ -60,7 +53,7 @@ const SelectPosition = ({
             className="text-4xl p-0 font-medium border-0 bg-transparent placeholder:text-gray-300"
             style={{ fontSize: "2.25rem" }}
             value={amount}
-            onChange={(e) => onAmountChange(e.target.value)}
+            onChange={(e) => handleAmountChange(e.target.value)}
           />
 
           <div className="mt-3 text-gray-500">
@@ -110,19 +103,7 @@ const SelectPosition = ({
         <SelectTokenModal
           isOpen={isTokenModalOpen}
           onOpenModal={setIsTokenModalOpen}
-          onConfirm={(token) => {
-            if (type === "long") {
-              if (shortToken?.contractAddress === token.contractAddress) {
-                setShortToken(null);
-              }
-              setLongToken(token);
-            } else {
-              if (longToken?.contractAddress === token.contractAddress) {
-                setLongToken(null);
-              }
-              setShortToken(token);
-            }
-          }}
+          onConfirm={onTokenSelect}
         />
       )}
     </div>

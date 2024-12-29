@@ -1,151 +1,161 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { Token } from "@/constants/token";
+import Image from "next/image";
+import { tokenAmountToDecimal } from "@/utils/currency";
+import { formatePercentage } from "@/utils/number";
 
 interface PositionCardProps {
-  pair: string;
-  price: number;
-  funding: number;
-  quantity: number;
-  createDate: Date;
-  endDate: Date;
-  fundingFee: number;
-  payout: number;
+  longToken: Token;
+  shortToken: Token;
+  feeTier: number;
+  position: {
+    tick: number;
+    amount: bigint;
+    startBlockNumber?: bigint;
+    endBlockNumber?: bigint;
+    payout?: bigint;
+  };
 }
 
 const PositionCard = ({
-  pair,
-  price,
-  funding,
-  quantity,
-  createDate,
-  endDate,
-  fundingFee,
-  payout,
+  longToken,
+  shortToken,
+  feeTier,
+  position,
 }: PositionCardProps) => {
-  const [showDetails, setShowDetails] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="border rounded-2xl p-4 hover:bg-gray-50">
+    <div className="border rounded-xl shadow-sm hover:shadow transition-shadow p-4">
       <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1 hover:bg-gray-100 rounded-full"
-          >
-            {isExpanded ? (
-              <ChevronUp className="h-5 w-5 text-gray-500" />
-            ) : (
-              <ChevronDown className="h-5 w-5 text-gray-500" />
-            )}
-          </button>
-          <h3 className="font-medium">
-            {pair} @ ${price.toLocaleString()}, {funding}% funding
+        <div className="flex items-center gap-3">
+          <div className="flex -space-x-3">
+            <Image
+              src={longToken.image}
+              alt={longToken.symbol}
+              width={32}
+              height={32}
+              className="rounded-full border-2 border-white"
+            />
+            <Image
+              src={shortToken.image}
+              alt={shortToken.symbol}
+              width={32}
+              height={32}
+              className="rounded-full border-2 border-white"
+            />
+          </div>
+
+          <h3 className="font-medium text-gray-900">
+            {longToken.symbol}
+            <span className="text-gray-400">/</span>
+            {shortToken.symbol}
           </h3>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            className="rounded-xl"
-            onClick={() => setShowDetails(true)}
-          >
-            Details
-          </Button>
+
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="p-2 hover:bg-gray-50 rounded-full transition-colors"
+        >
+          {isExpanded ? (
+            <ChevronUp className="h-5 w-5 text-gray-500" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-gray-500" />
+          )}
+        </button>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-x-2">
+        <div className="text-center bg-gray-50 rounded-xl py-3">
+          <p className="text-xs text-gray-500">Amount</p>
+          <p className="font-medium text-gray-900">
+            {`${tokenAmountToDecimal(
+              position.amount,
+              longToken.decimals
+            ).toFixed(2)} ${longToken.symbol}`}
+          </p>
+        </div>
+        <div className="text-center bg-gray-50 rounded-xl py-3">
+          <p className="text-xs text-gray-500">Fee Rate</p>
+          <p className="font-medium text-gray-900">
+            {formatePercentage(feeTier / 10000)}
+          </p>
         </div>
       </div>
 
       {isExpanded && (
-        <div className="mt-4 pl-8">
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Quantity</span>
-              <span className="font-medium">{quantity}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Create Date</span>
-              <span className="font-medium">
-                {createDate.toLocaleDateString()}
+        <div className="mt-4 pt-4 border-t flex flex-col gap-2">
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-500">Quantity</span>
+            <div className="flex items-center gap-1">
+              <Image
+                src={longToken.image}
+                alt={longToken.symbol}
+                width={20}
+                height={20}
+                className="rounded-full"
+              />
+              <span className="text-sm font-medium text-gray-900">
+                {`${tokenAmountToDecimal(
+                  position.amount,
+                  longToken.decimals
+                ).toFixed(2)}`}
               </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">End Date</span>
-              <span className="font-medium">
-                {endDate.toLocaleDateString()}
+              <span className="text-sm font-medium text-gray-500">
+                {longToken.symbol}
               </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Funding Fee</span>
-              <span className="font-medium">
-                ${fundingFee.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Payout</span>
-              <span className="font-medium">${payout.toLocaleString()}</span>
             </div>
           </div>
+          {position.startBlockNumber && (
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">Start Block Number</span>
+              <span className="text-sm font-medium text-gray-900">
+                {position.startBlockNumber.toString()}
+              </span>
+            </div>
+          )}
+          {position.endBlockNumber && (
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">End Block Number</span>
+              <span className="text-sm font-medium text-gray-900">
+                {position.endBlockNumber.toString()}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-500">Funding Fee</span>
+            <span className="text-sm font-medium text-gray-900">
+              {formatePercentage(feeTier / 10000)}
+            </span>
+          </div>
+          {position.payout && (
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-500">Payout</span>
+              <div className="flex items-center gap-1">
+                <Image
+                  src={shortToken.image}
+                  alt={shortToken.symbol}
+                  width={20}
+                  height={20}
+                  className="rounded-full"
+                />
+                <span className="text-sm font-medium text-gray-900">
+                  {`${tokenAmountToDecimal(
+                    position.payout,
+                    shortToken.decimals
+                  ).toFixed(2)}`}
+                </span>
+                <span className="text-sm font-medium text-gray-500">
+                  {shortToken.symbol}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       )}
-
-      <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent
-          className={cn("sm:max-w-[425px] rounded-2xl sm:rounded-2xl p-6")}
-        >
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">
-              Position Details
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="flex flex-col gap-4 mt-4">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Quantity</span>
-              <span className="font-medium">{quantity}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Create Date</span>
-              <span className="font-medium">
-                {createDate.toLocaleDateString()}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">End Date</span>
-              <span className="font-medium">
-                {endDate.toLocaleDateString()}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Funding Fee</span>
-              <span className="font-medium">
-                ${fundingFee.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Payout</span>
-              <span className="font-medium">${payout.toLocaleString()}</span>
-            </div>
-
-            <div className="flex gap-2 mt-4">
-              <Button variant="outline" className="flex-1 rounded-xl">
-                Extend Position
-              </Button>
-              <Button variant="destructive" className="flex-1 rounded-xl">
-                Close Position
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

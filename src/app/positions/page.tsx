@@ -1,51 +1,69 @@
 "use client";
 
 import Page from "../_components/common/page";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import PositionCard from "../_components/positions/position-card";
 import SelectPositionHeader from "../_components/positions/select-position-header";
 import useGlobalStore from "@/stores/global/global-store";
+import { usePositions } from "@/hooks/usePositions";
+import { useAccount } from "wagmi";
+import { data as Tokens } from "@/constants/token";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface PositionsProps {}
 
-type Position = {
-  id: string;
-  type: "Long" | "Short" | "Liquidity";
-  tokenA: string;
-  tokenB: string;
-  createdAt: Date;
-  expiryDate: Date;
-  fundingFee: number;
-};
-
 const Positions = ({}: PositionsProps) => {
-  const { sortBy } = useGlobalStore();
+  const { address } = useAccount();
 
-  const [positions] = useState<Position[]>([
+  const { positionType } = useGlobalStore();
+
+  const { positions, feeTier, principalToken, quoteToken } = usePositions(
+    address as string,
+    process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
+  );
+
+  const data = useMemo(() => {
+    return positions.filter((p) => p.type === positionType);
+  }, [positions, positionType]);
+
+  const longToken = useMemo(() => {
+    return Tokens.find(
+      (t) => t.contractAddress.toLowerCase() === principalToken?.toLowerCase()
+    );
+  }, [principalToken]);
+
+  const shortToken = useMemo(() => {
+    return Tokens.find(
+      (t) => t.contractAddress.toLowerCase() === quoteToken?.toLowerCase()
+    );
+  }, [quoteToken]);
+
+  const testFeeTier = 10000;
+  const testLongToken = Tokens[0];
+  const testShortToken = Tokens[1];
+  const testData = [
     {
-      id: "1",
-      type: "Long",
-      tokenA: "ETH",
-      tokenB: "USDC",
-      createdAt: new Date("2024-01-01"),
-      expiryDate: new Date("2024-02-01"),
-      fundingFee: 100,
+      positionId: 1,
+      entryBlockNumber: BigInt(100),
+      expirationBlockNumber: BigInt(200),
+      type: "long",
+      tickIndex: 1000,
+      amount: BigInt("1000000000000000000"),
+      qTokensEarned: BigInt("1000000000000000000"),
     },
-  ]);
-
-  const sortedPositions = [...positions].sort((a, b) => {
-    switch (sortBy) {
-      case "createdAt":
-        return b.createdAt.getTime() - a.createdAt.getTime();
-      case "expiryDate":
-        return a.expiryDate.getTime() - b.expiryDate.getTime();
-      case "fundingFee":
-        return b.fundingFee - a.fundingFee;
-      default:
-        return 0;
-    }
-  });
+    {
+      positionId: 2,
+      type: "short",
+      tickIndex: 2000,
+      amount: BigInt("2000000000000000000"),
+    },
+    {
+      positionId: 3,
+      type: "liquidity",
+      tickIndex: 3000,
+      amount: BigInt("3000000000000000000"),
+    },
+  ];
 
   return (
     <Page>
@@ -53,24 +71,24 @@ const Positions = ({}: PositionsProps) => {
         <div className="max-w-lg w-full">
           <SelectPositionHeader />
 
-          <div className="flex flex-col justify-center items-center">
-            <div className="max-w-lg w-full">
-              <div className="space-y-4 mt-4">
-                {sortedPositions.map((position) => (
-                  <PositionCard
-                    key={position.id}
-                    pair={`${position.tokenA}/${position.tokenB}`}
-                    price={0} // You'll need to add price to your Position type
-                    funding={position.fundingFee}
-                    quantity={0} // You'll need to add quantity to your Position type
-                    createDate={position.createdAt}
-                    endDate={position.expiryDate}
-                    fundingFee={position.fundingFee}
-                    payout={0} // You'll need to add payout to your Position type
-                  />
-                ))}
-              </div>
-            </div>
+          <div className="space-y-4 mt-4">
+            {testData
+              .filter((p) => p.type === positionType)
+              .map((position) => (
+                <PositionCard
+                  key={position.positionId}
+                  longToken={testLongToken}
+                  shortToken={testShortToken}
+                  feeTier={testFeeTier}
+                  position={{
+                    tick: position.tickIndex,
+                    amount: position.amount,
+                    startBlockNumber: position.entryBlockNumber,
+                    endBlockNumber: position.expirationBlockNumber,
+                    payout: position.qTokensEarned,
+                  }}
+                />
+              ))}
           </div>
         </div>
       </div>
