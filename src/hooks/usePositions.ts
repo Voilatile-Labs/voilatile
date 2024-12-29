@@ -3,7 +3,7 @@ import { readContracts } from "@wagmi/core";
 import { useEffect, useMemo, useState } from "react";
 import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
 import { config } from "@/app/_containers/wallet-provider";
-import { UserPosition } from "@/stores/global/global-store";
+// import { UserPosition } from "@/stores/global/global-store";
 
 interface PositionData {
   positionId: number;

@@ -1,42 +1,41 @@
 "use client";
 
 import Page from "../_components/common/page";
-import { useMemo, useState } from "react";
 import PositionCard from "../_components/positions/position-card";
 import SelectPositionHeader from "../_components/positions/select-position-header";
 import useGlobalStore from "@/stores/global/global-store";
-import { usePositions } from "@/hooks/usePositions";
-import { useAccount } from "wagmi";
+// import { usePositions } from "@/hooks/usePositions";
+// import { useAccount } from "wagmi";
 import { data as Tokens } from "@/constants/token";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface PositionsProps {}
 
 const Positions = ({}: PositionsProps) => {
-  const { address } = useAccount();
+  // const { address } = useAccount();
 
   const { positionType } = useGlobalStore();
 
-  const { positions, feeTier, principalToken, quoteToken } = usePositions(
-    address as string,
-    process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
-  );
+  // const { positions, principalToken, quoteToken } = usePositions(
+  //   address as string,
+  //   process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
+  // );
 
-  const data = useMemo(() => {
-    return positions.filter((p) => p.type === positionType);
-  }, [positions, positionType]);
+  // const data = useMemo(() => {
+  //   return positions.filter((p) => p.type === positionType);
+  // }, [positions, positionType]);
 
-  const longToken = useMemo(() => {
-    return Tokens.find(
-      (t) => t.contractAddress.toLowerCase() === principalToken?.toLowerCase()
-    );
-  }, [principalToken]);
+  // const longToken = useMemo(() => {
+  //   return Tokens.find(
+  //     (t) => t.contractAddress.toLowerCase() === principalToken?.toLowerCase()
+  //   );
+  // }, [principalToken]);
 
-  const shortToken = useMemo(() => {
-    return Tokens.find(
-      (t) => t.contractAddress.toLowerCase() === quoteToken?.toLowerCase()
-    );
-  }, [quoteToken]);
+  // const shortToken = useMemo(() => {
+  //   return Tokens.find(
+  //     (t) => t.contractAddress.toLowerCase() === quoteToken?.toLowerCase()
+  //   );
+  // }, [quoteToken]);
 
   const testFeeTier = 10000;
   const testLongToken = Tokens[0];
