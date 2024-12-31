@@ -3,15 +3,12 @@
 import { Button } from "@/components/ui/button";
 import SelectPosition from "./select-position";
 import useGlobalStore from "@/stores/global/global-store";
-import { useAccount } from "wagmi";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { calculateTokenTick } from "@/utils/currency";
-import { priceToTick, tickToPrice } from "../open-position/select-strike-price";
-import { formatNumberWithDecimals } from "@/utils/number";
+import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
+import { useState } from "react";
+import { tokenAmountToDecimal } from "@/utils/currency";
 
 const PositionSelector = () => {
-  const { openConnectModal } = useConnectModal();
-  const { address } = useAccount();
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     setStep,
@@ -19,16 +16,14 @@ const PositionSelector = () => {
     setShortToken,
     shortToken,
     longToken,
-    tokenPriceMap,
-    setTick,
     setLongTokenAmount,
     setShortTokenAmount,
     tick,
-    longTokenAmount,
-    shortTokenAmount,
   } = useGlobalStore();
 
-  console.log({ longTokenAmount, shortTokenAmount, tick });
+  const { getCalculatedLongPrices } = usePeripheryContract(
+    process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
+  );
 
   return (
     <div>
@@ -41,24 +36,38 @@ const PositionSelector = () => {
               setShortToken(null);
             }
             setLongToken(token);
-
-            if (tokenPriceMap && longToken && shortToken) {
-              const value = calculateTokenTick(
-                tokenPriceMap,
-                longToken,
-                shortToken
-              );
-              setTick(value);
-            }
           }}
-          onAmountChange={(value) => {
-            if (longToken) {
-              setLongTokenAmount(value);
+          onAmountChange={async (amount, rawAmount) => {
+            if (!longToken) return;
 
-              const amount = Number(value) / tickToPrice(tick);
-              setShortTokenAmount(
-                formatNumberWithDecimals(amount, 6).toString()
-              );
+            setLongTokenAmount({ amount, rawAmount });
+
+            if (!amount) {
+              setShortTokenAmount({ amount: "", rawAmount: 0 });
+              return;
+            }
+
+            setIsLoading(true);
+            try {
+              const prices = await getCalculatedLongPrices([tick]);
+              console.log({ prices });
+
+              if (prices) {
+                const scaledPrice = prices[0] / 2 ** 64;
+                const shortRawAmount = scaledPrice * rawAmount;
+
+                setShortTokenAmount({
+                  amount: tokenAmountToDecimal(
+                    shortRawAmount,
+                    shortToken?.decimals
+                  ).toString(),
+                  rawAmount: shortRawAmount,
+                });
+              }
+            } catch (error) {
+              console.error("Failed:", error);
+            } finally {
+              setIsLoading(false);
             }
           }}
         />
@@ -66,57 +75,23 @@ const PositionSelector = () => {
         <SelectPosition
           label="Short"
           type="short"
+          readOnly={true}
+          isLoading={isLoading}
           onTokenSelect={(token) => {
             if (longToken?.contractAddress === token.contractAddress) {
               setLongToken(null);
             }
             setShortToken(token);
-
-            if (tokenPriceMap && longToken && shortToken) {
-              const value = calculateTokenTick(
-                tokenPriceMap,
-                longToken,
-                shortToken
-              );
-              setTick(value);
-            }
-          }}
-          onAmountChange={(value) => {
-            if (shortToken) {
-              setShortTokenAmount(value);
-
-              if (longToken && longTokenAmount) {
-                const longTokenPrice = tokenPriceMap[longToken.searchId] || 1;
-                const shortTokenPrice = tokenPriceMap[shortToken.searchId] || 1;
-
-                const PAmount = Number(longTokenAmount) * shortTokenPrice;
-                const QAmount = Number(value) * longTokenPrice;
-
-                const price = PAmount / QAmount;
-
-                const tick = priceToTick(price);
-                setTick(tick);
-              }
-            }
           }}
         />
       </div>
 
-      {address ? (
-        <Button
-          onClick={() => setStep("open-position")}
-          className="rounded-2xl w-full mt-4 h-12 text-base"
-        >
-          Get trading
-        </Button>
-      ) : (
-        <Button
-          onClick={openConnectModal}
-          className="rounded-2xl w-full mt-4 h-12 text-base"
-        >
-          Connect
-        </Button>
-      )}
+      <Button
+        onClick={() => setStep("open-position")}
+        className="rounded-2xl w-full mt-4 h-12 text-base"
+      >
+        Get trading
+      </Button>
     </div>
   );
 };

@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import WalletProvider from "./_containers/wallet-provider";
 import { TokenPriceProvider } from "./_containers/token-price-provider";
+import { Toaster } from "@/components/ui/toaster";
+import InitialStateProvider from "./_containers/initial-state";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,7 +25,12 @@ const Layout = ({ children }: LayoutProps) => {
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
         <WalletProvider>
-          <TokenPriceProvider>{children}</TokenPriceProvider>
+          <InitialStateProvider>
+            {/* <TokenPriceProvider> */}
+            {children}
+            {/* </TokenPriceProvider> */}
+          </InitialStateProvider>
+          <Toaster />
         </WalletProvider>
       </body>
     </html>

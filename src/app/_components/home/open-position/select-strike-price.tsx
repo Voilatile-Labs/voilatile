@@ -1,9 +1,6 @@
 "use client";
 
-import { Plus, Minus } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useMemo, useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -14,66 +11,71 @@ import {
 } from "recharts";
 import useGlobalStore from "@/stores/global/global-store";
 import { CategoricalChartState } from "recharts/types/chart/types";
-import { formateNumber, formatePercentage } from "@/utils/number";
-import { calculateTokenTick } from "@/utils/currency";
-
-const TICK_BASE = 1.0001;
-
-export const tickToPrice = (tick: number): number => {
-  return Math.pow(TICK_BASE, tick);
-};
-
-export const priceToTick = (price: number): number => {
-  return Math.ceil(Math.log(price) / Math.log(TICK_BASE));
-};
-
-export const tickToProfit = (tick: number) => {
-  const value = Math.pow(TICK_BASE, tick);
-  return (value - 1) * 100;
-};
+import { formatNumberWithDecimals, formatePercentage } from "@/utils/number";
+import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
+import { TICK_SPACE, tickToPrice, tickToProfit } from "@/utils/currency";
+import { priceToTick } from "@/utils/currency";
+import BigNumber from "bignumber.js";
 
 const SelectStrikePrice = () => {
-  const { longToken, shortToken, tick, setTick, tokenPriceMap } =
-    useGlobalStore();
-
-  useEffect(() => {
-    if (tokenPriceMap && longToken && shortToken) {
-      const value = calculateTokenTick(tokenPriceMap, longToken, shortToken);
-      setTick(value);
-    }
-  }, [longToken, shortToken, tokenPriceMap, setTick]);
-
-  const predefinedTicks = useMemo(
-    () => [tick - 1000, tick, tick + 1000],
-    [tick]
+  const { longToken, tick, setTick } = useGlobalStore();
+  const { atm, getCalculatedLongPrices } = usePeripheryContract(
+    process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
   );
 
-  const points = 5000;
-  const start = tick - 10000;
-  const end = tick + 10000;
-  const chartData = Array.from({ length: points }, (_, i) => {
-    const t = Math.round(start + (i * (end - start)) / (points - 1));
-    return {
-      spotPrice: tickToPrice(t),
-      profit: tickToProfit(t),
-      selectedProfit: tickToProfit(tick),
+  const [chartData, setChartData] = useState<
+    Array<{
+      tick: number;
+      price: number;
+      profit: number;
+    }>
+  >([]);
+
+  const tickData = useMemo(() => {
+    if (!atm) {
+      return [];
+    }
+
+    const start =
+      Math.floor(priceToTick(tickToPrice(atm) - 0.05) / TICK_SPACE) *
+      TICK_SPACE;
+
+    const end =
+      Math.ceil(priceToTick(tickToPrice(atm) + 0.05) / TICK_SPACE) * TICK_SPACE;
+
+    const ticks = Array.from(
+      { length: (end - start) / TICK_SPACE + 1 },
+      (_, i) => start + i * TICK_SPACE
+    );
+
+    return ticks;
+  }, [atm]);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      if (!atm) return;
+
+      const ticks = tickData.map((x) => atm + tick - x);
+      const atmPrices = await getCalculatedLongPrices([atm]);
+      const atmPrice = atmPrices?.[0] || null;
+      const tickPrices = await getCalculatedLongPrices(ticks);
+
+      if (!atmPrice || !tickPrices) return;
+
+      const data = ticks.map((x, i) => ({
+        tick: x,
+        price: (tickPrices[i] * tickToPrice(x)) / tickToPrice(atm + tick - x),
+        profit: tickPrices[i] - (atmPrice / atmPrice) * 100,
+      }));
+
+      setChartData(data);
     };
-  });
+
+    fetchChartData();
+  }, [tick, atm, getCalculatedLongPrices, tickData]);
 
   const handleTickChange = (value: number) => {
     setTick(tick + value);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "") {
-      setTick(0);
-      return;
-    }
-    const numValue = Math.round(Number(value));
-    if (!isNaN(numValue)) {
-      setTick(numValue);
-    }
   };
 
   const handleChartClick = (data: CategoricalChartState) => {
@@ -96,53 +98,18 @@ const SelectStrikePrice = () => {
     <div className="w-full">
       <h3 className="text-xs font-medium mb-2">Select Strike Price</h3>
 
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-4 items-center">
+        <div className="w-24 text-sm">{tickToProfit(tick).toFixed(2)}%</div>
         <div className="flex-1">
-          <Input
-            type="number"
-            value={tick}
-            onChange={handleInputChange}
-            className="w-full rounded-xl"
-            step="1"
+          <input
+            type="range"
+            min={tickData?.[0]?.toString() || "0"}
+            max={tickData?.[tickData.length - 1]?.toString() || "100"}
+            value={tick.toString()}
+            onChange={(e) => setTick(BigNumber(e.target.value))}
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
         </div>
-
-        <div className="flex gap-1">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handleTickChange(-1)}
-            className="h-10 w-10 rounded-xl"
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handleTickChange(1)}
-            className="h-10 w-10 rounded-xl"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="text-xs text-gray-500 mt-1">
-        Profit: {tickToProfit(tick)}%
-      </div>
-
-      <div className="flex gap-2 mt-2">
-        {predefinedTicks.map((t) => (
-          <Button
-            key={t}
-            variant="outline"
-            size="sm"
-            onClick={() => setTick(t)}
-            className={`flex-1 ${t === tick ? "bg-gray-100" : ""}`}
-          >
-            {formatePercentage(tickToProfit(t))}
-          </Button>
-        ))}
       </div>
 
       <div className="mt-4 h-[300px] border p-2 rounded-xl">
@@ -183,7 +150,7 @@ const SelectStrikePrice = () => {
                 name === "profit" ? "Profit" : "Selected Profit",
               ]}
               labelFormatter={(spotPrice) =>
-                `Spot Price: ${formateNumber(spotPrice)}x`
+                `Spot Price: ${formatNumberWithDecimals(spotPrice)}x`
               }
             />
 

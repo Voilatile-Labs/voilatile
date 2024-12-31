@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, Check } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import useGlobalStore from "@/stores/global/global-store";
+import { formatePercentage } from "@/utils/number";
 
 const SelectFeeTier = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -11,13 +12,13 @@ const SelectFeeTier = () => {
   const { fee, setFee } = useGlobalStore();
 
   const feeTiers = [
-    { percentage: 0.01, description: "Low funding fee" },
-    { percentage: 0.05, description: "Medium funding fee" },
-    { percentage: 0.15, description: "High funding fee" },
+    { fee: 500, description: "Low funding fee" },
+    { fee: 3000, description: "Medium funding fee" },
+    { fee: 10000, description: "High funding fee" },
   ];
 
   const selectedFeeTier =
-    feeTiers.find((tier) => tier.percentage === fee) || feeTiers[0];
+    feeTiers.find((tier) => tier.fee === fee) || feeTiers[0];
 
   return (
     <div className="w-full">
@@ -30,7 +31,7 @@ const SelectFeeTier = () => {
         <div className="flex justify-between items-center">
           <div>
             <div className="text-sm font-medium">
-              {selectedFeeTier.percentage * 100}% funding fee
+              {formatePercentage(selectedFeeTier.fee / 10000)} funding fee
             </div>
             <div className="text-xs text-gray-500">
               {selectedFeeTier.description}
@@ -56,15 +57,17 @@ const SelectFeeTier = () => {
         <div className="grid grid-cols-3 gap-2 mt-2">
           {feeTiers.map((tier) => (
             <div
-              key={tier.percentage}
-              onClick={() => setFee(tier.percentage)}
+              key={tier.fee}
+              onClick={() => {
+                if (selectedFeeTier.fee === tier.fee) {
+                  setFee(tier.fee);
+                }
+              }}
               className={`relative flex justify-between items-center p-3 border rounded-xl hover:bg-gray-50 cursor-pointer ${
-                selectedFeeTier.percentage === tier.percentage
-                  ? "bg-gray-50"
-                  : ""
+                selectedFeeTier.fee === tier.fee ? "bg-gray-50" : " opacity-60"
               }`}
             >
-              {selectedFeeTier.percentage === tier.percentage && (
+              {selectedFeeTier.fee === tier.fee && (
                 <div className="absolute top-2 right-2">
                   <div className="bg-black rounded-full h-4 w-4 flex items-center justify-center">
                     <Check
@@ -76,7 +79,7 @@ const SelectFeeTier = () => {
               )}
               <div>
                 <div className="text-sm font-medium">
-                  {tier.percentage * 100}%
+                  {formatePercentage(tier.fee / 10000)}
                 </div>
                 <div className="text-xs text-gray-500">{tier.description}</div>
               </div>

@@ -15,14 +15,26 @@ interface GlobalStore {
   longToken: Token | null;
   setLongToken: (longToken: Token | null) => void;
 
-  longTokenAmount: string;
-  setLongTokenAmount: (longTokenAmount: string) => void;
+  longTokenAmount: {
+    amount: string;
+    rawAmount: number;
+  };
+  setLongTokenAmount: (longTokenAmount: {
+    amount: string;
+    rawAmount: number;
+  }) => void;
 
   shortToken: Token | null;
   setShortToken: (shortToken: Token | null) => void;
 
-  shortTokenAmount: string;
-  setShortTokenAmount: (shortTokenAmount: string) => void;
+  shortTokenAmount: {
+    amount: string;
+    rawAmount: number;
+  };
+  setShortTokenAmount: (shortTokenAmount: {
+    amount: string;
+    rawAmount: number;
+  }) => void;
 
   tick: number;
   setTick: (tick: number) => void;
@@ -33,6 +45,7 @@ interface GlobalStore {
   tokenPriceMap: Record<string, number>;
   setTokenPriceMap: (tokenPriceMap: Record<string, number>) => void;
 
+  // for positions
   positionType: UserPosition;
   setPositionType: (positionType: UserPosition) => void;
 
@@ -50,11 +63,23 @@ const useGlobalStore = create<GlobalStore>((set) => ({
   shortToken: Tokens[1],
   setShortToken: (shortToken: Token | null) => set({ shortToken }),
 
-  longTokenAmount: "",
-  setLongTokenAmount: (longTokenAmount: string) => set({ longTokenAmount }),
+  longTokenAmount: {
+    amount: "",
+    rawAmount: 0,
+  },
+  setLongTokenAmount: (longTokenAmount: {
+    amount: string;
+    rawAmount: number;
+  }) => set({ longTokenAmount }),
 
-  shortTokenAmount: "",
-  setShortTokenAmount: (shortTokenAmount: string) => set({ shortTokenAmount }),
+  shortTokenAmount: {
+    amount: "",
+    rawAmount: 0,
+  },
+  setShortTokenAmount: (shortTokenAmount: {
+    amount: string;
+    rawAmount: number;
+  }) => set({ shortTokenAmount }),
 
   tick: 0,
   setTick: (tick: number) => set({ tick }),
@@ -66,6 +91,7 @@ const useGlobalStore = create<GlobalStore>((set) => ({
   setTokenPriceMap: (tokenPriceMap: Record<string, number>) =>
     set({ tokenPriceMap }),
 
+  // for positions
   positionType: UserPosition.LONG,
   setPositionType: (positionType: UserPosition) => set({ positionType }),
 

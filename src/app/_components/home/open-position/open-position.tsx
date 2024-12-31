@@ -8,29 +8,30 @@ import SelectTokenPair from "./select-token-pair";
 import SelectFeeTier from "./select-fee-tier";
 import { useAccount } from "wagmi";
 import SelectPosition from "../position-selector/select-position";
-import SelectStrikePrice, {
-  priceToTick,
-  tickToPrice,
-} from "./select-strike-price";
-import { calculateTokenTick } from "@/utils/currency";
-import { formatNumberWithDecimals } from "@/utils/number";
+import { tokenAmountToDecimal } from "@/utils/currency";
+import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
+import { useState } from "react";
+import SelectStrikePrice from "./select-strike-price";
 
 const OpenPosition = () => {
   const { openConnectModal } = useConnectModal();
   const { address } = useAccount();
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { getCalculatedLongPrices } = usePeripheryContract(
+    process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
+  );
+
   const {
     setStep,
     longToken,
     shortToken,
-    tokenPriceMap,
     setLongToken,
     setShortToken,
     setLongTokenAmount,
     setShortTokenAmount,
-    setTick,
     tick,
-    longTokenAmount,
   } = useGlobalStore();
 
   return (
@@ -55,30 +56,40 @@ const OpenPosition = () => {
           <SelectPosition
             type="long"
             allowTokenChange={false}
-            usdLabel="Position size:"
             onTokenSelect={(token) => {
               if (shortToken?.contractAddress === token.contractAddress) {
                 setShortToken(null);
               }
               setLongToken(token);
-
-              if (tokenPriceMap && longToken && shortToken) {
-                const value = calculateTokenTick(
-                  tokenPriceMap,
-                  longToken,
-                  shortToken
-                );
-                setTick(value);
-              }
             }}
-            onAmountChange={(value) => {
-              if (longToken) {
-                setLongTokenAmount(value);
+            onAmountChange={async (amount, rawAmount) => {
+              if (!longToken) return;
 
-                const amount = Number(value) / tickToPrice(tick);
-                setShortTokenAmount(
-                  formatNumberWithDecimals(amount, 6).toString()
-                );
+              setLongTokenAmount({ amount, rawAmount });
+
+              if (!amount) {
+                setShortTokenAmount({ amount: "", rawAmount: 0 });
+                return;
+              }
+
+              setIsLoading(true);
+              try {
+                const prices = await getCalculatedLongPrices([tick]);
+                if (prices) {
+                  const scaledPrice = prices[0] / 2 ** 64;
+                  const shortRawAmount = scaledPrice * rawAmount;
+                  setShortTokenAmount({
+                    amount: tokenAmountToDecimal(
+                      shortRawAmount,
+                      shortToken?.decimals
+                    ).toString(),
+                    rawAmount: shortRawAmount,
+                  });
+                }
+              } catch (error) {
+                console.error("Failed:", error);
+              } finally {
+                setIsLoading(false);
               }
             }}
           />
@@ -93,39 +104,13 @@ const OpenPosition = () => {
           <SelectPosition
             type="short"
             allowTokenChange={false}
+            readOnly={true}
+            isLoading={isLoading}
             onTokenSelect={(token) => {
               if (longToken?.contractAddress === token.contractAddress) {
                 setLongToken(null);
               }
               setShortToken(token);
-
-              if (tokenPriceMap && longToken && shortToken) {
-                const value = calculateTokenTick(
-                  tokenPriceMap,
-                  longToken,
-                  shortToken
-                );
-                setTick(value);
-              }
-            }}
-            onAmountChange={(value) => {
-              if (shortToken) {
-                setShortTokenAmount(value);
-
-                if (longToken && longTokenAmount) {
-                  const longTokenPrice = tokenPriceMap[longToken.searchId] || 1;
-                  const shortTokenPrice =
-                    tokenPriceMap[shortToken.searchId] || 1;
-
-                  const PAmount = Number(longTokenAmount) * shortTokenPrice;
-                  const QAmount = Number(value) * longTokenPrice;
-
-                  const price = PAmount / QAmount;
-
-                  const tick = priceToTick(price);
-                  setTick(tick);
-                }
-              }
             }}
           />
         </div>

@@ -1,30 +1,32 @@
-import { priceToTick } from "@/app/_components/home/open-position/select-strike-price";
-import { Token } from "@/constants/token";
 import { formatUnits, parseUnits } from "viem";
 
-export const calculateTokenTick = (
-  tokenPriceMap: Record<string, number>,
-  longToken: Token,
-  shortToken: Token
-) => {
-  const longTokenPrice = tokenPriceMap[longToken.searchId] || 1;
-  const shortTokenPrice = tokenPriceMap[shortToken.searchId] || 1;
+export const TICK_BASE = 1.0001;
+export const TICK_SPACE = 20;
 
-  const price = longTokenPrice / shortTokenPrice;
-  const value = priceToTick(price);
-  return value;
+export const tickToPrice = (tick: number): number => {
+  return TICK_BASE ** tick;
+};
+
+export const priceToTick = (price: number): number => {
+  const tick = Math.log(price) / Math.log(TICK_BASE);
+  return Math.ceil(tick / TICK_SPACE) * TICK_SPACE;
+};
+
+export const tickToProfit = (tick: number): number => {
+  const value = TICK_BASE ** tick;
+  return value - 1;
 };
 
 export const tokenAmountToDecimal = (
-  amount: bigint,
+  amount: number,
   decimals: number = 18
 ): number => {
-  return Number(formatUnits(amount, decimals));
+  return Number(formatUnits(BigInt(amount), decimals));
 };
 
 export const decimalToTokenAmount = (
   amount: number,
   decimals: number = 18
-): bigint => {
-  return parseUnits(amount.toString(), decimals);
+): number => {
+  return Number(parseUnits(amount.toString(), decimals));
 };
