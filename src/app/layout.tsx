@@ -4,7 +4,6 @@ import "@rainbow-me/rainbowkit/styles.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import WalletProvider from "./_containers/wallet-provider";
-import { TokenPriceProvider } from "./_containers/token-price-provider";
 import { Toaster } from "@/components/ui/toaster";
 import InitialStateProvider from "./_containers/initial-state";
 

@@ -145,7 +145,7 @@ const PositionCard = ({
           <p className="text-xs text-gray-500">Amount</p>
           <p className="font-medium text-gray-900">
             {`${tokenAmountToDecimal(
-              position.amount,
+              Number(position.amount),
               longToken.decimals
             ).toFixed(2)} ${longToken.symbol}`}
           </p>
@@ -172,7 +172,7 @@ const PositionCard = ({
               />
               <span className="text-sm font-medium text-gray-900">
                 {`${tokenAmountToDecimal(
-                  position.amount,
+                  Number(position.amount),
                   longToken.decimals
                 ).toFixed(2)}`}
               </span>
@@ -216,7 +216,7 @@ const PositionCard = ({
                 />
                 <span className="text-sm font-medium text-gray-900">
                   {`${tokenAmountToDecimal(
-                    position.payout,
+                    Number(position.payout),
                     shortToken.decimals
                   ).toFixed(2)}`}
                 </span>

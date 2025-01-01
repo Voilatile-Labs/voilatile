@@ -95,6 +95,7 @@ const SelectStrikePrice = () => {
     };
 
     fetchChartData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tickData, tick, atm]);
 
   const handleTickChange = async (value: number) => {
