@@ -59,8 +59,8 @@ const SelectStrikePrice = () => {
     //   Math.ceil(priceToTick(atmPrice + 0.05 * atmPrice) / TICK_SPACE) *
     //   TICK_SPACE;
 
-    const start = Math.floor((atm - 500) / TICK_SPACE) * TICK_SPACE;
-    const end = Math.ceil((atm + 500) / TICK_SPACE) * TICK_SPACE;
+    const start = Math.floor((atm - 4055) / TICK_SPACE) * TICK_SPACE;
+    const end = Math.ceil((atm + 4055) / TICK_SPACE) * TICK_SPACE;
 
     const ticks = Array.from(
       { length: (end - start) / TICK_SPACE + 1 },
