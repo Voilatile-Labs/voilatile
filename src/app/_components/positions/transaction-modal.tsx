@@ -4,13 +4,13 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useEffect } from "react";
+import { toast } from "@/hooks/use-toast";
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -27,10 +27,14 @@ const TransactionModal = ({
 }: TransactionModalProps) => {
   const { writeContract, data: txHash } = useWriteContract();
 
-  const { isLoading: isReceiptLoading, isSuccess: isReceiptSuccess } =
-    useWaitForTransactionReceipt({
-      hash: txHash,
-    });
+  const {
+    isLoading: isReceiptLoading,
+    isSuccess: isReceiptSuccess,
+    isError: isReceiptError,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({
+    hash: txHash,
+  });
 
   useEffect(() => {
     if (isReceiptSuccess) {
@@ -38,30 +42,50 @@ const TransactionModal = ({
     }
   }, [isReceiptSuccess, onSuccess]);
 
+  useEffect(() => {
+    if (isReceiptError && receiptError) {
+      toast({
+        title: "Transaction Failed",
+      });
+      onClose(receiptError);
+    }
+  }, [isReceiptError, receiptError, onClose]);
+
   const handleConfirm = () => {
     writeContract(data.contract);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{data?.title}</DialogTitle>
-          <DialogDescription>{data?.description}</DialogDescription>
+          <DialogTitle className="text-left">{data?.title}</DialogTitle>
+          <DialogDescription className="text-left">
+            {data?.description}
+          </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className="flex gap-3">
-          <Button onClick={handleConfirm} disabled={isReceiptLoading}>
-            {isReceiptLoading ? "Confirming..." : "Confirm"}
+        <div className="flex flex-col gap-3 mt-4">
+          <Button
+            onClick={handleConfirm}
+            disabled={isReceiptLoading}
+            className="w-full"
+          >
+            {isReceiptLoading ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : (
+              "Confirm"
+            )}
           </Button>
           <Button
             variant="outline"
             onClick={onClose}
             disabled={isReceiptLoading}
+            className="w-full"
           >
             Cancel
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

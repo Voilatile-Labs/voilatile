@@ -11,6 +11,7 @@ import { Token } from "@/constants/token";
 import clsx from "clsx";
 import { decimalToTokenAmount } from "@/utils/currency";
 import { motion } from "framer-motion";
+import { toast } from "@/hooks/use-toast";
 
 interface SelectPositionProps {
   type: "long" | "short";
@@ -42,6 +43,13 @@ const SelectPosition = ({
     useGlobalStore();
 
   const handleAmountChange = (amount: string, token: Token) => {
+    if (!token) {
+      toast({
+        title: "Token Required",
+        description: "Please select a token first",
+      });
+      return;
+    }
     const regex = /^[0-9]*\.?[0-9]*$/;
     if (amount === "" || regex.test(amount)) {
       const rawAmount = decimalToTokenAmount(

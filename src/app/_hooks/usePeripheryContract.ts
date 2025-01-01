@@ -70,7 +70,6 @@ export const usePeripheryContract = (contract: string) => {
       toast({
         title: "Error Fetching Prices",
         description: "Unable to retrieve the long position prices.",
-        variant: "destructive",
       });
       console.error("Failed:", error);
       return;

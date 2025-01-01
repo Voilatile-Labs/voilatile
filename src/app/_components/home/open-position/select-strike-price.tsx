@@ -16,6 +16,7 @@ import { CategoricalChartState } from "recharts/types/chart/types";
 import { formatNumberWithDecimals, formatePercentage } from "@/utils/number";
 import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
 import {
+  decimalToTokenAmount,
   TICK_SPACE,
   tickToPrice,
   tickToProfit,
@@ -108,7 +109,7 @@ const SelectStrikePrice = () => {
           parseInt(shortRawAmount.toString()),
           shortToken?.decimals
         ).toString(),
-        rawAmount: shortRawAmount,
+        rawAmount: decimalToTokenAmount(shortRawAmount, shortToken?.decimals),
       });
     }
   };

@@ -5,7 +5,8 @@ import SelectPosition from "./select-position";
 import useGlobalStore from "@/stores/global/global-store";
 import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
 import { useState } from "react";
-import { tokenAmountToDecimal } from "@/utils/currency";
+import { decimalToTokenAmount, tokenAmountToDecimal } from "@/utils/currency";
+import { toast } from "@/hooks/use-toast";
 
 const PositionSelector = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +39,13 @@ const PositionSelector = () => {
             setLongToken(token);
           }}
           onAmountChange={async (amount, rawAmount) => {
-            if (!longToken) return;
+            if (!shortToken) {
+              toast({
+                title: "Token Required",
+                description: "Please select a deposit token first",
+              });
+              return;
+            }
 
             setLongTokenAmount({ amount, rawAmount });
 
@@ -59,7 +66,10 @@ const PositionSelector = () => {
                     parseInt(shortRawAmount.toString()),
                     shortToken?.decimals
                   ).toString(),
-                  rawAmount: shortRawAmount,
+                  rawAmount: decimalToTokenAmount(
+                    shortRawAmount,
+                    shortToken?.decimals
+                  ),
                 });
               }
             } catch (error) {

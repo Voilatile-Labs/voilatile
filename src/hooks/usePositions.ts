@@ -83,8 +83,6 @@ export const usePositions = (address: string, contractAddress: string) => {
           (id) => Number(id?.result || 0)
         );
 
-        console.log({ nextLongId, nextShortId, nextLiquidityId });
-
         const longPositionCalls = Array.from(
           { length: nextLongId },
           (_, i) => ({
@@ -122,8 +120,6 @@ export const usePositions = (address: string, contractAddress: string) => {
             ...liquidityPositionCalls,
           ],
         });
-
-        console.log({ allPositions });
 
         if (!allPositions) {
           throw new Error("Failed to fetch positions");
