@@ -26,7 +26,7 @@ const SelectPositionHeader = () => {
         onValueChange={(value) => setPositionType(value as UserPosition)}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-3 rounded-xl">
+        <TabsList className="grid w-full grid-cols-3 rounded-2xl">
           <TabsTrigger value={UserPosition.LONG} className="text-xs rounded-lg">
             Long
           </TabsTrigger>
@@ -53,7 +53,7 @@ const SelectPositionHeader = () => {
             setSortBy(value as "createdAt" | "expiryDate" | "fundingFee")
           }
         >
-          <SelectTrigger className="w-[140px] rounded-xl text-xs">
+          <SelectTrigger className="w-[140px] rounded-2xl text-xs">
             <SelectValue placeholder="Sort by..." />
           </SelectTrigger>
           <SelectContent>

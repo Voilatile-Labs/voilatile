@@ -12,9 +12,8 @@ export const priceToTick = (price: number): number => {
   return Math.ceil(tick / TICK_SPACE) * TICK_SPACE;
 };
 
-export const tickToProfit = (tick: number): number => {
-  const value = TICK_BASE ** tick;
-  return value - 1;
+export const tickToProfit = (tick: number, atm: number): number => {
+  return ((tickToPrice(tick) - tickToPrice(atm)) / tickToPrice(atm)) * 100;
 };
 
 export const tokenAmountToDecimal = (

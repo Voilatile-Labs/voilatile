@@ -28,7 +28,7 @@ const SelectTokenPair = () => {
           }}
         >
           {longToken ? (
-            <div className="flex items-center justify-between w-full">
+            <div className="flex items-center justify-between w-full pr-2">
               <div className="flex items-center gap-2">
                 <Image
                   src={longToken.image}
@@ -58,7 +58,7 @@ const SelectTokenPair = () => {
           }}
         >
           {shortToken ? (
-            <div className="flex items-center justify-between w-full">
+            <div className="flex items-center justify-between w-full pr-2">
               <div className="flex items-center gap-2">
                 <Image
                   src={shortToken.image}

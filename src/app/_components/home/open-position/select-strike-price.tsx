@@ -8,17 +8,32 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
+  ReferenceDot,
+  ReferenceLine,
 } from "recharts";
 import useGlobalStore from "@/stores/global/global-store";
 import { CategoricalChartState } from "recharts/types/chart/types";
 import { formatNumberWithDecimals, formatePercentage } from "@/utils/number";
 import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
-import { TICK_SPACE, tickToPrice, tickToProfit } from "@/utils/currency";
+import {
+  TICK_SPACE,
+  tickToPrice,
+  tickToProfit,
+  tokenAmountToDecimal,
+} from "@/utils/currency";
 import { priceToTick } from "@/utils/currency";
-import BigNumber from "bignumber.js";
+import { Slider } from "@/components/ui/slider";
 
 const SelectStrikePrice = () => {
-  const { longToken, tick, setTick } = useGlobalStore();
+  const {
+    longToken,
+    tick,
+    setTick,
+    shortToken,
+    longTokenAmount,
+    setShortTokenAmount,
+  } = useGlobalStore();
+
   const { atm, getCalculatedLongPrices } = usePeripheryContract(
     process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
   );
@@ -35,13 +50,16 @@ const SelectStrikePrice = () => {
     if (!atm) {
       return [];
     }
+    // const atmPrice = tickToPrice(atm);
+    // const start =
+    //   Math.floor(priceToTick(atmPrice - 0.05 * atmPrice) / TICK_SPACE) *
+    //   TICK_SPACE;
+    // const end =
+    //   Math.ceil(priceToTick(atmPrice + 0.05 * atmPrice) / TICK_SPACE) *
+    //   TICK_SPACE;
 
-    const start =
-      Math.floor(priceToTick(tickToPrice(atm) - 0.05) / TICK_SPACE) *
-      TICK_SPACE;
-
-    const end =
-      Math.ceil(priceToTick(tickToPrice(atm) + 0.05) / TICK_SPACE) * TICK_SPACE;
+    const start = Math.floor((atm - 500) / TICK_SPACE) * TICK_SPACE;
+    const end = Math.ceil((atm + 500) / TICK_SPACE) * TICK_SPACE;
 
     const ticks = Array.from(
       { length: (end - start) / TICK_SPACE + 1 },
@@ -56,26 +74,43 @@ const SelectStrikePrice = () => {
       if (!atm) return;
 
       const ticks = tickData.map((x) => atm + tick - x);
+
       const atmPrices = await getCalculatedLongPrices([atm]);
       const atmPrice = atmPrices?.[0] || null;
+
       const tickPrices = await getCalculatedLongPrices(ticks);
 
-      if (!atmPrice || !tickPrices) return;
+      if (!atmPrice || !tickPrices) {
+        return [];
+      }
 
-      const data = ticks.map((x, i) => ({
+      const data = tickData.map((x, i) => ({
         tick: x,
         price: (tickPrices[i] * tickToPrice(x)) / tickToPrice(atm + tick - x),
-        profit: tickPrices[i] - (atmPrice / atmPrice) * 100,
+        profit: ((tickPrices[i] - atmPrice) / atmPrice) * 100,
       }));
 
       setChartData(data);
     };
 
     fetchChartData();
-  }, [tick, atm, getCalculatedLongPrices, tickData]);
+  }, [tickData, tick, atm]);
 
-  const handleTickChange = (value: number) => {
-    setTick(tick + value);
+  const handleTickChange = async (value: number) => {
+    setTick(value);
+    const prices = await getCalculatedLongPrices([tick]);
+
+    if (prices) {
+      const shortRawAmount = longTokenAmount.rawAmount * prices[0];
+
+      setShortTokenAmount({
+        amount: tokenAmountToDecimal(
+          parseInt(shortRawAmount.toString()),
+          shortToken?.decimals
+        ).toString(),
+        rawAmount: shortRawAmount,
+      });
+    }
   };
 
   const handleChartClick = (data: CategoricalChartState) => {
@@ -98,21 +133,24 @@ const SelectStrikePrice = () => {
     <div className="w-full">
       <h3 className="text-xs font-medium mb-2">Select Strike Price</h3>
 
-      <div className="flex gap-4 items-center">
-        <div className="w-24 text-sm">{tickToProfit(tick).toFixed(2)}%</div>
-        <div className="flex-1">
-          <input
-            type="range"
-            min={tickData?.[0]?.toString() || "0"}
-            max={tickData?.[tickData.length - 1]?.toString() || "100"}
-            value={tick.toString()}
-            onChange={(e) => setTick(BigNumber(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+      <div className="border rounded-2xl p-1 flex gap-3 items-center">
+        <div className="flex justify-center text-lg font-medium border rounded-xl p-2 w-24 bg-gray-50">
+          {formatePercentage(tickToProfit(tick, atm || 0))}
+        </div>
+        <div className="flex-1 mr-2">
+          <Slider
+            defaultValue={[tick]}
+            min={tickData?.[0] || 0}
+            max={tickData?.[tickData.length - 1] || 100}
+            step={1}
+            value={[tick]}
+            onValueChange={([value]) => handleTickChange(value)}
+            className="w-full [&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
           />
         </div>
       </div>
 
-      <div className="mt-4 h-[300px] border p-2 rounded-xl">
+      <div className="mt-4 h-[300px] border p-2 rounded-2xl">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
@@ -120,7 +158,7 @@ const SelectStrikePrice = () => {
             onClick={handleChartClick}
           >
             <XAxis
-              dataKey="spotPrice"
+              dataKey="tick"
               label={{
                 value: XAxisLabel,
                 position: "bottom",
@@ -143,6 +181,7 @@ const SelectStrikePrice = () => {
               tick={{ fontSize: 11 }}
               tickFormatter={(profit) => formatePercentage(profit)}
             />
+
             <Tooltip
               contentStyle={{ fontSize: "12px", padding: "4px 8px" }}
               formatter={(value: number, name: string) => [
@@ -155,18 +194,24 @@ const SelectStrikePrice = () => {
             />
 
             <Line
-              type="monotone"
+              type="natural"
               dataKey="profit"
               stroke="rgb(75, 192, 192)"
               dot={false}
             />
 
-            <Line
-              type="monotone"
-              dataKey="selectedProfit"
-              stroke="rgb(255, 99, 132)"
-              strokeDasharray="5 5"
-              dot={false}
+            <ReferenceDot
+              x={atm}
+              y={chartData.find((x) => x.tick === atm)?.profit || 0}
+              r={4}
+              fill="rgb(75, 192, 192)"
+              stroke="none"
+            />
+
+            <ReferenceLine
+              x={atm}
+              stroke="rgb(75, 192, 192)"
+              strokeDasharray="3 3"
             />
           </LineChart>
         </ResponsiveContainer>

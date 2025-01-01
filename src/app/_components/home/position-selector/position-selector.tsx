@@ -10,20 +10,20 @@ import { tokenAmountToDecimal } from "@/utils/currency";
 const PositionSelector = () => {
   const [isLoading, setIsLoading] = useState(false);
 
+  const { getCalculatedLongPrices } = usePeripheryContract(
+    process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
+  );
+
   const {
     setStep,
     setLongToken,
     setShortToken,
-    shortToken,
     longToken,
+    shortToken,
     setLongTokenAmount,
     setShortTokenAmount,
     tick,
   } = useGlobalStore();
-
-  const { getCalculatedLongPrices } = usePeripheryContract(
-    process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
-  );
 
   return (
     <div>
@@ -50,15 +50,13 @@ const PositionSelector = () => {
             setIsLoading(true);
             try {
               const prices = await getCalculatedLongPrices([tick]);
-              console.log({ prices });
 
               if (prices) {
-                const scaledPrice = prices[0] / 2 ** 64;
-                const shortRawAmount = scaledPrice * rawAmount;
+                const shortRawAmount = rawAmount * prices[0];
 
                 setShortTokenAmount({
                   amount: tokenAmountToDecimal(
-                    shortRawAmount,
+                    parseInt(shortRawAmount.toString()),
                     shortToken?.decimals
                   ).toString(),
                   rawAmount: shortRawAmount,

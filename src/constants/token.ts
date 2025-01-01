@@ -27,7 +27,7 @@ export const data: Token[] = [
     name: "Volatile USDC",
     symbol: "vUSDC",
     image: "https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png",
-    decimals: 18,
+    decimals: 6,
     source: "coinmarketcap",
     searchId: "3408",
   },

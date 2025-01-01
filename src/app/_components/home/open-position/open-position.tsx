@@ -25,10 +25,10 @@ const OpenPosition = () => {
 
   const {
     setStep,
-    longToken,
-    shortToken,
     setLongToken,
     setShortToken,
+    longToken,
+    shortToken,
     setLongTokenAmount,
     setShortTokenAmount,
     tick,
@@ -36,7 +36,7 @@ const OpenPosition = () => {
 
   return (
     <div className="w-full">
-      <div className="rounded-xl bg-white shadow-sm p-4 max-w-lg w-full border flex flex-col gap-4">
+      <div className="rounded-2xl bg-white shadow-sm p-4 max-w-lg w-full border flex flex-col gap-4">
         <div className="flex items-center justify-center gap-4 mb-4 relative">
           <Button
             variant="ghost"
@@ -75,12 +75,13 @@ const OpenPosition = () => {
               setIsLoading(true);
               try {
                 const prices = await getCalculatedLongPrices([tick]);
+
                 if (prices) {
-                  const scaledPrice = prices[0] / 2 ** 64;
-                  const shortRawAmount = scaledPrice * rawAmount;
+                  const shortRawAmount = rawAmount * prices[0];
+
                   setShortTokenAmount({
                     amount: tokenAmountToDecimal(
-                      shortRawAmount,
+                      parseInt(shortRawAmount.toString()),
                       shortToken?.decimals
                     ).toString(),
                     rawAmount: shortRawAmount,

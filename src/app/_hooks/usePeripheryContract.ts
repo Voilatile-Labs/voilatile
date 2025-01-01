@@ -46,7 +46,8 @@ export const usePeripheryContract = (contract: string) => {
 
     return tickIndexes.map((x) => {
       const zero = Math.max(0, tickToPrice(x) - tickToPrice(atm));
-      const premium = (tickToPrice(atm) / 50) * 100 ** ((20 * (x - atm)) / atm);
+      const premium =
+        (tickToPrice(atm) / 50) * 100 ** -Math.abs((20 * (x - atm)) / atm);
       return zero + premium;
     });
   };

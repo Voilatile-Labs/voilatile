@@ -27,7 +27,7 @@ const SelectFeeTier = () => {
         <span className="text-gray-400">(% of position size)</span>
       </h3>
 
-      <div className="border rounded-xl p-3">
+      <div className="border rounded-2xl p-3">
         <div className="flex justify-between items-center">
           <div>
             <div className="text-sm font-medium">
@@ -63,7 +63,7 @@ const SelectFeeTier = () => {
                   setFee(tier.fee);
                 }
               }}
-              className={`relative flex justify-between items-center p-3 border rounded-xl hover:bg-gray-50 cursor-pointer ${
+              className={`relative flex justify-between items-center p-3 border rounded-2xl hover:bg-gray-50 cursor-pointer ${
                 selectedFeeTier.fee === tier.fee ? "bg-gray-50" : " opacity-60"
               }`}
             >
