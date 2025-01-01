@@ -41,8 +41,6 @@ export const usePeripheryContract = (contract: string) => {
     };
   }, [data]);
 
-  console.log({ feeTier, pToken, qToken, atm });
-
   const getCalculatedLongPrices = async (tickIndexes: number[]) => {
     if (!atm) return [];
 
