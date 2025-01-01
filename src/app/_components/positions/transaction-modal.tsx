@@ -31,7 +31,6 @@ const TransactionModal = ({
     isLoading: isReceiptLoading,
     isSuccess: isReceiptSuccess,
     isError: isReceiptError,
-    error: receiptError,
   } = useWaitForTransactionReceipt({
     hash: txHash,
   });
@@ -43,13 +42,13 @@ const TransactionModal = ({
   }, [isReceiptSuccess, onSuccess]);
 
   useEffect(() => {
-    if (isReceiptError && receiptError) {
+    if (isReceiptError) {
       toast({
         title: "Transaction Failed",
       });
-      onClose(receiptError);
+      onClose();
     }
-  }, [isReceiptError, receiptError, onClose]);
+  }, [isReceiptError, onClose]);
 
   const handleConfirm = () => {
     writeContract(data.contract);

@@ -119,7 +119,7 @@ const OpenPosition = () => {
           .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "buy",
-        args: [BigInt(tick), longTokenAmount.rawAmount],
+        args: [tick, longTokenAmount.rawAmount],
       },
       title: "Open Position",
       description: "Are you sure you want to open this position?",
@@ -257,18 +257,20 @@ const OpenPosition = () => {
         </Button>
       )}
 
-      <TransactionModal
-        isOpen={openTransactionModal}
-        onSuccess={() => {
-          setTransactionData(null);
-          setOpenTransactionModal(false);
-        }}
-        onClose={() => {
-          setTransactionData(null);
-          setOpenTransactionModal(false);
-        }}
-        data={transactionData}
-      />
+      {transactionData && (
+        <TransactionModal
+          isOpen={openTransactionModal}
+          onSuccess={() => {
+            setTransactionData(null);
+            setOpenTransactionModal(false);
+          }}
+          onClose={() => {
+            setTransactionData(null);
+            setOpenTransactionModal(false);
+          }}
+          data={transactionData}
+        />
+      )}
     </div>
   );
 };

@@ -73,12 +73,10 @@ const SelectStrikePrice = () => {
     const fetchChartData = async () => {
       if (!atm) return;
 
-      const ticks = tickData.map((x) => atm + tick - x);
-
       const atmPrices = await getCalculatedLongPrices([atm]);
       const atmPrice = atmPrices?.[0] || null;
 
-      const tickPrices = await getCalculatedLongPrices(ticks);
+      const tickPrices = await getCalculatedLongPrices(tickData);
 
       if (!atmPrice || !tickPrices) {
         return [];

@@ -53,8 +53,12 @@ export const usePeripheryContract = (contract: string) => {
   };
 
   const getContractLongPrices = async (tickIndexes: number[]) => {
+    if (!atm) return [];
+
     try {
-      const contracts = tickIndexes.map((tickIndex) => ({
+      const ticks = tickIndexes.map((x) => atm + x - tickIndexes[0]);
+
+      const contracts = ticks.map((tickIndex) => ({
         address: contract as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "fetchLongPrice",
