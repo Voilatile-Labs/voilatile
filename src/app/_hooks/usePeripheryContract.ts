@@ -45,7 +45,7 @@ export const usePeripheryContract = (contract: string) => {
     if (!atm) return [];
 
     return tickIndexes.map((x) => {
-      const zero = Math.max(0, tickToPrice(x) - tickToPrice(atm));
+      const zero = Math.max(0, tickToPrice(atm) - tickToPrice(x));
       const premium =
         (tickToPrice(atm) / 50) * 100 ** -Math.abs((20 * (x - atm)) / atm);
       return zero + premium;
@@ -56,9 +56,7 @@ export const usePeripheryContract = (contract: string) => {
     if (!atm) return [];
 
     try {
-      const ticks = tickIndexes.map((x) => atm + x - tickIndexes[0]);
-
-      const contracts = ticks.map((tickIndex) => ({
+      const contracts = tickIndexes.map((tickIndex) => ({
         address: contract as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "fetchLongPrice",

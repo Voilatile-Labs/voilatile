@@ -58,8 +58,8 @@ const SelectStrikePrice = () => {
     //   Math.ceil(priceToTick(atmPrice + 0.05 * atmPrice) / TICK_SPACE) *
     //   TICK_SPACE;
 
-    const start = Math.floor((atm - 4055) / TICK_SPACE) * TICK_SPACE;
-    const end = Math.ceil((atm + 4055) / TICK_SPACE) * TICK_SPACE;
+    const start = Math.floor((atm - 500) / TICK_SPACE) * TICK_SPACE;
+    const end = Math.ceil((atm + 500) / TICK_SPACE) * TICK_SPACE;
 
     const ticks = Array.from(
       { length: (end - start) / TICK_SPACE + 1 },
@@ -73,10 +73,12 @@ const SelectStrikePrice = () => {
     const fetchChartData = async () => {
       if (!atm) return;
 
+      const ticks = tickData.map((x) => atm + tick - x);
+
       const atmPrices = await getCalculatedLongPrices([atm]);
       const atmPrice = atmPrices?.[0] || null;
 
-      const tickPrices = await getCalculatedLongPrices(tickData);
+      const tickPrices = await getCalculatedLongPrices(ticks);
 
       if (!atmPrice || !tickPrices) {
         return [];
@@ -85,12 +87,16 @@ const SelectStrikePrice = () => {
       const atmTickPrice = tickToPrice(atm);
 
       const data = tickData.map((x, i) => {
-        const a = atmTickPrice * tickToPrice(x - atm);
-        const b = atmTickPrice * tickToPrice(tick - x);
+        const price =
+          tickPrices[i] *
+          ((atmTickPrice * tickToPrice(tick - atm)) /
+            (atmTickPrice * tickToPrice(atm + tick - x - atm)));
+        const profit = ((tickPrices[i] - atmPrice) / atmPrice) * 100;
+
         return {
           tick: x,
-          price: tickPrices[i] * (a / b),
-          profit: ((tickPrices[i] - atmPrice) / atmPrice) * 100,
+          price,
+          profit,
         };
       });
 
@@ -196,9 +202,7 @@ const SelectStrikePrice = () => {
                 return [
                   <>
                     <div>PnL: {formatePercentage(value)}</div>
-                    <div>
-                      Strike Price: {formatNumberWithDecimals(price, 18)}
-                    </div>
+                    <div>Strike Price: {formatNumberWithDecimals(price)}x</div>
                   </>,
                 ];
               }}
