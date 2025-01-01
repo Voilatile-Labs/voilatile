@@ -22,7 +22,6 @@ import {
   tickToProfit,
   tokenAmountToDecimal,
 } from "@/utils/currency";
-import { priceToTick } from "@/utils/currency";
 import { Slider } from "@/components/ui/slider";
 
 const SelectStrikePrice = () => {
@@ -85,11 +84,17 @@ const SelectStrikePrice = () => {
         return [];
       }
 
-      const data = tickData.map((x, i) => ({
-        tick: x,
-        price: (tickPrices[i] * tickToPrice(x)) / tickToPrice(atm + tick - x),
-        profit: ((tickPrices[i] - atmPrice) / atmPrice) * 100,
-      }));
+      const atmTickPrice = tickToPrice(atm);
+
+      const data = tickData.map((x, i) => {
+        const a = atmTickPrice * tickToPrice(x - atm);
+        const b = atmTickPrice * tickToPrice(tick - x);
+        return {
+          tick: x,
+          price: tickPrices[i] * (a / b),
+          profit: ((tickPrices[i] - atmPrice) / atmPrice) * 100,
+        };
+      });
 
       setChartData(data);
     };
@@ -117,9 +122,8 @@ const SelectStrikePrice = () => {
 
   const handleChartClick = (data: CategoricalChartState) => {
     if (data && data.activePayload && data.activePayload[0]) {
-      const price = data.activePayload[0].payload.spotPrice;
-      const value = priceToTick(price);
-      setTick(value);
+      const tick = data.activePayload[0].payload.tick;
+      setTick(tick);
     }
   };
 
@@ -186,13 +190,21 @@ const SelectStrikePrice = () => {
 
             <Tooltip
               contentStyle={{ fontSize: "12px", padding: "4px 8px" }}
-              formatter={(value: number, name: string) => [
-                formatePercentage(value),
-                name === "profit" ? "Profit" : "Selected Profit",
-              ]}
-              labelFormatter={(spotPrice) =>
-                `Spot Price: ${formatNumberWithDecimals(spotPrice)}x`
-              }
+              formatter={(value: number, name: string, payload: any) => {
+                const price =
+                  payload?.payload?.price *
+                  10 **
+                    ((longToken?.decimals || 0) - (shortToken?.decimals || 0));
+                return [
+                  <>
+                    <div>PnL: {formatePercentage(value)}</div>
+                    <div>
+                      Strike Price: {formatNumberWithDecimals(price, 18)}
+                    </div>
+                  </>,
+                ];
+              }}
+              labelClassName="hidden"
             />
 
             <Line
