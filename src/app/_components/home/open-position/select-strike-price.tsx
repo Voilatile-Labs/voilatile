@@ -58,8 +58,8 @@ const SelectStrikePrice = () => {
     //   Math.ceil(priceToTick(atmPrice + 0.05 * atmPrice) / TICK_SPACE) *
     //   TICK_SPACE;
 
-    const start = Math.floor((atm - 500) / TICK_SPACE) * TICK_SPACE;
-    const end = Math.ceil((atm + 500) / TICK_SPACE) * TICK_SPACE;
+    const start = Math.floor((atm - 1000) / TICK_SPACE) * TICK_SPACE;
+    const end = Math.ceil((atm + 1000) / TICK_SPACE) * TICK_SPACE;
 
     const ticks = Array.from(
       { length: (end - start) / TICK_SPACE + 1 },
@@ -152,7 +152,7 @@ const SelectStrikePrice = () => {
             defaultValue={[tick]}
             min={tickData?.[0] || 0}
             max={tickData?.[tickData.length - 1] || 100}
-            step={1}
+            step={20}
             value={[tick]}
             onValueChange={([value]) => handleTickChange(value)}
             className="w-full [&_[role=slider]]:h-4 [&_[role=slider]]:w-4"

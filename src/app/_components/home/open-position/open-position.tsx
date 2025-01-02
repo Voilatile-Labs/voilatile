@@ -174,6 +174,8 @@ const OpenPosition = () => {
               try {
                 const prices = await getCalculatedLongPrices([tick]);
 
+                console.log({ prices, tick });
+
                 if (prices) {
                   const shortRawAmount = rawAmount * prices[0];
 

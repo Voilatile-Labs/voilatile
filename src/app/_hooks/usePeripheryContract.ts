@@ -53,7 +53,8 @@ export const usePeripheryContract = (contract: string) => {
         100 **
           -Math.abs(
             5.4 *
-              ((atmTickPrice * tickToPrice(x) - atmTickPrice) / atmTickPrice)
+              ((atmTickPrice * tickToPrice(x - atm) - atmTickPrice) /
+                atmTickPrice)
           );
       return zero + premium;
     });

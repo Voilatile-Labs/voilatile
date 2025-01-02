@@ -23,7 +23,7 @@ export const data: Token[] = [
   },
   {
     chainId: 11155111,
-    contractAddress: "0xa39817cB69a460ca75E9884341AFe8B89543D281",
+    contractAddress: "0xa5Ce24b8927B7e601F114B08992C25E4Bf226211",
     name: "Volatile USDC",
     symbol: "vUSDC",
     image: "https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png",
