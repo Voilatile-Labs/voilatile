@@ -44,10 +44,17 @@ export const usePeripheryContract = (contract: string) => {
   const getCalculatedLongPrices = async (tickIndexes: number[]) => {
     if (!atm) return [];
 
+    const atmTickPrice = tickToPrice(atm);
+
     return tickIndexes.map((x) => {
-      const zero = Math.max(0, tickToPrice(atm) - tickToPrice(x));
+      const zero = Math.max(0, atmTickPrice - tickToPrice(x));
       const premium =
-        (tickToPrice(atm) / 50) * 100 ** -Math.abs((20 * (x - atm)) / atm);
+        (atmTickPrice / 50) *
+        100 **
+          -Math.abs(
+            5.4 *
+              ((atmTickPrice * tickToPrice(x) - atmTickPrice) / atmTickPrice)
+          );
       return zero + premium;
     });
   };
