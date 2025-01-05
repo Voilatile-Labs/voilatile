@@ -2,13 +2,15 @@
 
 import { Button } from "@/components/ui/button";
 import SelectPosition from "./select-position";
-import useGlobalStore from "@/stores/global/global-store";
+import useLongPositionStore, {
+  CreateLongPosition,
+} from "@/stores/global/long-position-store";
 import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
 import { useState } from "react";
-import { decimalToTokenAmount, tokenAmountToDecimal } from "@/utils/currency";
+import { tokenAmountToDecimal } from "@/utils/currency";
 import { toast } from "@/hooks/use-toast";
 
-const PositionSelector = () => {
+const SelectToken = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { getCalculatedLongPrices } = usePeripheryContract(
@@ -17,32 +19,42 @@ const PositionSelector = () => {
 
   const {
     setStep,
-    setLongToken,
-    setShortToken,
     longToken,
+    setLongToken,
     shortToken,
+    setShortToken,
+    longTokenAmount,
     setLongTokenAmount,
+    shortTokenAmount,
     setShortTokenAmount,
     tick,
-  } = useGlobalStore();
+  } = useLongPositionStore();
 
   return (
     <div>
       <div className="flex flex-col gap-2">
         <SelectPosition
           label="Long"
-          type="long"
+          token={longToken}
+          amount={longTokenAmount}
           onTokenSelect={(token) => {
-            if (shortToken?.contractAddress === token.contractAddress) {
-              setShortToken(null);
+            if (longToken?.contractAddress === token.contractAddress) {
+              return;
             }
+
+            if (shortToken?.contractAddress === token.contractAddress) {
+              setShortToken(undefined);
+            }
+
+            setLongTokenAmount({ amount: "", rawAmount: 0 });
+            setShortTokenAmount({ amount: "", rawAmount: 0 });
             setLongToken(token);
           }}
           onAmountChange={async (amount, rawAmount) => {
             if (!shortToken) {
               toast({
                 title: "Token Required",
-                description: "Please select a deposit token first",
+                description: "Please select a short token first",
               });
               return;
             }
@@ -56,23 +68,26 @@ const PositionSelector = () => {
 
             setIsLoading(true);
             try {
-              const prices = await getCalculatedLongPrices([tick]);
+              const longPrices = await getCalculatedLongPrices([tick]);
 
-              if (prices) {
-                const shortRawAmount = rawAmount * prices[0];
+              if (longPrices) {
+                const shortTokenRawAmount = Math.floor(
+                  rawAmount * longPrices[0]
+                );
 
                 setShortTokenAmount({
                   amount: tokenAmountToDecimal(
-                    parseInt(shortRawAmount.toString()),
-                    shortToken?.decimals
+                    shortTokenRawAmount,
+                    shortToken.decimals
                   ).toString(),
-                  rawAmount: decimalToTokenAmount(
-                    shortRawAmount,
-                    shortToken?.decimals
-                  ),
+                  rawAmount: shortTokenRawAmount,
                 });
               }
             } catch (error) {
+              toast({
+                title: "Calculation Error",
+                description: "Failed to calculate token amount.",
+              });
               console.error("Failed:", error);
             } finally {
               setIsLoading(false);
@@ -82,20 +97,28 @@ const PositionSelector = () => {
 
         <SelectPosition
           label="Short"
-          type="short"
+          token={shortToken}
+          amount={shortTokenAmount}
           readOnly={true}
           isLoading={isLoading}
           onTokenSelect={(token) => {
-            if (longToken?.contractAddress === token.contractAddress) {
-              setLongToken(null);
+            if (shortToken?.contractAddress === token.contractAddress) {
+              return;
             }
+
+            if (longToken?.contractAddress === token.contractAddress) {
+              setLongToken(undefined);
+            }
+
+            setLongTokenAmount({ amount: "", rawAmount: 0 });
+            setShortTokenAmount({ amount: "", rawAmount: 0 });
             setShortToken(token);
           }}
         />
       </div>
 
       <Button
-        onClick={() => setStep("open-position")}
+        onClick={() => setStep(CreateLongPosition.OpenPosition)}
         className="rounded-2xl w-full mt-4 h-12 text-base"
       >
         Get trading
@@ -104,4 +127,4 @@ const PositionSelector = () => {
   );
 };
 
-export default PositionSelector;
+export default SelectToken;

@@ -17,7 +17,7 @@ import { useState } from "react";
 interface SelectTokenModalProps {
   isOpen: boolean;
   onOpenModal: (open: boolean) => void;
-  onConfirm: (token: Token) => void;
+  onConfirm?: (token: Token) => void;
 }
 
 const SelectTokenModal = ({
@@ -37,7 +37,9 @@ const SelectTokenModal = ({
     : Tokens;
 
   const onSelectToken = (token: Token) => {
-    onConfirm(token);
+    if (onConfirm) {
+      onConfirm(token);
+    }
     onOpenModal(false);
   };
 

@@ -56,7 +56,7 @@ const TransactionModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] rounded-2xl sm:rounded-2xl p-4">
         <DialogHeader>
           <DialogTitle className="text-left">{data?.title}</DialogTitle>
           <DialogDescription className="text-left">
@@ -64,11 +64,11 @@ const TransactionModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-3 mt-4">
+        <div className="flex flex-col gap-2 mt-4">
           <Button
             onClick={handleConfirm}
             disabled={isReceiptLoading}
-            className="w-full"
+            className="w-full rounded-xl"
           >
             {isReceiptLoading ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -80,7 +80,7 @@ const TransactionModal = ({
             variant="outline"
             onClick={onClose}
             disabled={isReceiptLoading}
-            className="w-full"
+            className="w-full rounded-xl"
           >
             Cancel
           </Button>

@@ -14,7 +14,7 @@ interface PositionsProps {}
 const Positions = ({}: PositionsProps) => {
   // const { address } = useAccount();
 
-  const { positionType } = useGlobalStore();
+  // const { positionType } = useGlobalStore();
 
   // const { positions, principalToken, quoteToken } = usePositions(
   //   address as string,
@@ -68,7 +68,7 @@ const Positions = ({}: PositionsProps) => {
     <Page>
       <div className="flex flex-col justify-center items-center p-4 py-8">
         <div className="max-w-lg w-full">
-          <SelectPositionHeader />
+          {/* <SelectPositionHeader />
 
           <div className="space-y-4 mt-4">
             {testData
@@ -90,7 +90,7 @@ const Positions = ({}: PositionsProps) => {
                   }}
                 />
               ))}
-          </div>
+          </div> */}
         </div>
       </div>
     </Page>

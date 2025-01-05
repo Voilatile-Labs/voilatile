@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect } from "react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import useGlobalStore from "@/stores/global/global-store";
+import { toast } from "@/hooks/use-toast";
 
 interface TokenPriceContextType {
   refetchTokenPrices: () => Promise<void>;
@@ -26,10 +27,10 @@ export function TokenPriceProvider({ children }: TokenPriceProviderProps) {
         const { data } = await axios.get("/api/token-prices");
         return data;
       } catch (error) {
-        // toast({
-        //   title: "Error Fetching Prices",
-        //   description: "Unable to retrieve current token prices.",
-        // });
+        toast({
+          title: "Error Fetching Prices",
+          description: "Unable to retrieve current token prices.",
+        });
         throw error;
       }
     },

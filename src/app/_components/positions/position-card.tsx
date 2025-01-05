@@ -8,7 +8,7 @@ import { tokenAmountToDecimal } from "@/utils/currency";
 import { formatePercentage } from "@/utils/number";
 import { useAccount } from "wagmi";
 import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
-import TransactionModal from "./transaction-modal";
+import TransactionModal from "../home/open-position/transaction-modal";
 import { Button } from "@/components/ui/button";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 

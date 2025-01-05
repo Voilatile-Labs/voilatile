@@ -389,6 +389,19 @@ export const VoilatilePeripheryABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "fetchFundingFee",
+    outputs: [
+      {
+        internalType: "uint128",
+        name: "fundingRate",
+        type: "uint128",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "address",
@@ -470,6 +483,30 @@ export const VoilatilePeripheryABI = [
         internalType: "uint128",
         name: "qTokensEarned",
         type: "uint128",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "int256",
+        name: "tickIndex",
+        type: "int256",
+      },
+    ],
+    name: "fetchUtilization",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "numerator",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "denominator",
+        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -612,6 +649,35 @@ export const VoilatilePeripheryABI = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "int256",
+        name: "lowerTick",
+        type: "int256",
+      },
+      {
+        internalType: "int256",
+        name: "upperTick",
+        type: "int256",
+      },
+    ],
+    name: "rangeLP",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "positionId",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

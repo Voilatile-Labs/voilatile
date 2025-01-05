@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import SelectTokenModal from "./select-token-modal";
-import useGlobalStore from "@/stores/global/global-store";
 import Image from "next/image";
 import { Token } from "@/constants/token";
 import clsx from "clsx";
@@ -14,23 +13,30 @@ import { motion } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 
 interface SelectPositionProps {
-  type: "long" | "short";
-
   label?: string;
-  amountLabel?: string;
+
+  token?: Token;
+  amount?: {
+    amount: string;
+    rawAmount: number;
+  };
 
   allowTokenChange?: boolean;
   readOnly?: boolean;
+
   isLoading?: boolean;
 
-  onTokenSelect: (token: Token) => void;
+  onTokenSelect?: (token: Token) => void;
   onAmountChange?: (amount: string, rawAmount: number) => void;
 }
 
 const SelectPosition = ({
-  type,
   label,
-  amountLabel,
+  token,
+  amount = {
+    amount: "",
+    rawAmount: 0,
+  },
   allowTokenChange = true,
   readOnly = false,
   isLoading = false,
@@ -39,17 +45,15 @@ const SelectPosition = ({
 }: SelectPositionProps) => {
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
 
-  const { longToken, shortToken, longTokenAmount, shortTokenAmount } =
-    useGlobalStore();
-
-  const handleAmountChange = (amount: string, token: Token) => {
+  const handleAmountChange = (amount: string) => {
     if (!token) {
       toast({
         title: "Token Required",
-        description: "Please select a token first",
+        description: "Please select a token first.",
       });
       return;
     }
+
     const regex = /^[0-9]*\.?[0-9]*$/;
     if (amount === "" || regex.test(amount)) {
       const rawAmount = decimalToTokenAmount(
@@ -59,10 +63,6 @@ const SelectPosition = ({
       onAmountChange?.(amount, rawAmount);
     }
   };
-
-  const token = type === "long" ? longToken : shortToken;
-  const amount =
-    type === "long" ? longTokenAmount.amount : shortTokenAmount.amount;
 
   return (
     <div className="max-w-lg w-full">
@@ -93,10 +93,8 @@ const SelectPosition = ({
                   "animate-pulse opacity-50"
                 )}
                 style={{ fontSize: "2.25rem" }}
-                value={amount}
-                onChange={(e) =>
-                  handleAmountChange(e.target.value, token as Token)
-                }
+                value={amount.amount}
+                onChange={(e) => handleAmountChange(e.target.value)}
                 readOnly={true}
               />
             </motion.div>
@@ -105,20 +103,17 @@ const SelectPosition = ({
               placeholder="0"
               className="text-4xl p-0 font-medium border-0 bg-transparent placeholder:text-gray-300"
               style={{ fontSize: "2.25rem" }}
-              value={amount}
-              onChange={(e) =>
-                handleAmountChange(e.target.value, token as Token)
-              }
+              value={amount.amount}
+              onChange={(e) => handleAmountChange(e.target.value)}
               readOnly={readOnly}
             />
           )}
 
           <div className="mt-3 text-gray-500">
-            {amountLabel && <span className="mr-2">{amountLabel}</span>}
             {Intl.NumberFormat("en-US", {
               style: "currency",
               currency: "USD",
-            }).format(parseFloat(amount || "0"))}
+            }).format(parseFloat(amount.amount || "0"))}
           </div>
         </div>
 

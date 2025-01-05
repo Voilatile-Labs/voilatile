@@ -11,18 +11,20 @@ import {
   ReferenceDot,
   ReferenceLine,
 } from "recharts";
-import useGlobalStore from "@/stores/global/global-store";
+import useLongPositionStore from "@/stores/global/long-position-store";
 import { CategoricalChartState } from "recharts/types/chart/types";
 import { formatNumberWithDecimals, formatePercentage } from "@/utils/number";
 import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
 import {
-  decimalToTokenAmount,
+  profitToTick,
   TICK_SPACE,
   tickToPrice,
   tickToProfit,
   tokenAmountToDecimal,
 } from "@/utils/currency";
 import { Slider } from "@/components/ui/slider";
+import { toast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 
 const SelectStrikePrice = () => {
   const {
@@ -32,7 +34,7 @@ const SelectStrikePrice = () => {
     shortToken,
     longTokenAmount,
     setShortTokenAmount,
-  } = useGlobalStore();
+  } = useLongPositionStore();
 
   const { atm, getCalculatedLongPrices } = usePeripheryContract(
     process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
@@ -41,22 +43,15 @@ const SelectStrikePrice = () => {
   const [chartData, setChartData] = useState<
     Array<{
       tick: number;
-      price: number;
       profit: number;
+      price: number;
     }>
   >([]);
 
-  const tickData = useMemo(() => {
+  const tickRangeData = useMemo(() => {
     if (!atm) {
       return [];
     }
-    // const atmPrice = tickToPrice(atm);
-    // const start =
-    //   Math.floor(priceToTick(atmPrice - 0.05 * atmPrice) / TICK_SPACE) *
-    //   TICK_SPACE;
-    // const end =
-    //   Math.ceil(priceToTick(atmPrice + 0.05 * atmPrice) / TICK_SPACE) *
-    //   TICK_SPACE;
 
     const start = Math.floor((atm - 1000) / TICK_SPACE) * TICK_SPACE;
     const end = Math.ceil((atm + 1000) / TICK_SPACE) * TICK_SPACE;
@@ -71,30 +66,36 @@ const SelectStrikePrice = () => {
 
   useEffect(() => {
     const fetchChartData = async () => {
-      if (!atm) return;
+      if (!tick || !atm || !tickRangeData.length) {
+        return;
+      }
 
-      const ticks = tickData.map((x) => atm + tick - x);
+      const tickLongPrices = await getCalculatedLongPrices([tick]);
+      const tickLongPrice = tickLongPrices?.[0] || null;
 
-      const atmPrices = await getCalculatedLongPrices([atm]);
-      const atmPrice = atmPrices?.[0] || null;
+      const calculatedTickRange = tickRangeData.map(
+        (xTick) => atm + (tick - xTick)
+      );
+      const tickRangeLongPrices = await getCalculatedLongPrices(
+        calculatedTickRange
+      );
 
-      const tickPrices = await getCalculatedLongPrices(ticks);
-
-      if (!atmPrice || !tickPrices) {
+      if (!tickLongPrice || !tickRangeLongPrices) {
         return [];
       }
 
       const atmTickPrice = tickToPrice(atm);
-
-      const data = tickData.map((x, i) => {
+      const data = tickRangeData.map((xTick, i) => {
         const price =
-          tickPrices[i] *
+          tickRangeLongPrices[i] *
           ((atmTickPrice * tickToPrice(tick - atm)) /
-            (atmTickPrice * tickToPrice(atm + tick - x - atm)));
-        const profit = ((tickPrices[i] - atmPrice) / atmPrice) * 100;
+            (atmTickPrice * tickToPrice(atm + (tick - xTick) - atm)));
+
+        const profit =
+          ((tickRangeLongPrices[i] - tickLongPrice) / tickLongPrice) * 100;
 
         return {
-          tick: x,
+          tick: xTick,
           price,
           profit,
         };
@@ -105,23 +106,65 @@ const SelectStrikePrice = () => {
 
     fetchChartData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tickData, tick, atm]);
+  }, [tickRangeData, tick, atm]);
 
   const handleTickChange = async (value: number) => {
     setTick(value);
-    const prices = await getCalculatedLongPrices([tick]);
 
-    if (prices) {
-      const shortRawAmount = longTokenAmount.rawAmount * prices[0];
+    if (!shortToken || !longTokenAmount) {
+      toast({
+        title: "Token Required",
+        description: "Please select a token first",
+      });
+      return;
+    }
+
+    const tickLongPrices = await getCalculatedLongPrices([value]);
+    const tickLongPrice = tickLongPrices?.[0] || null;
+
+    if (tickLongPrice) {
+      const shortTokenRawAmount = Math.floor(
+        longTokenAmount.rawAmount * tickLongPrice
+      );
 
       setShortTokenAmount({
         amount: tokenAmountToDecimal(
-          parseInt(shortRawAmount.toString()),
-          shortToken?.decimals
+          shortTokenRawAmount,
+          shortToken.decimals
         ).toString(),
-        rawAmount: decimalToTokenAmount(shortRawAmount, shortToken?.decimals),
+        rawAmount: shortTokenRawAmount,
       });
     }
+  };
+
+  const [percentageStrikePrice, setPercentageStrikePrice] = useState("");
+
+  const handlePercentageStrikePriceChange = (value: string) => {
+    if (!atm || !tickRangeData.length) {
+      return;
+    }
+
+    if (value === formatePercentage(tickToProfit(tick, atm))) {
+      return;
+    }
+
+    if (value === "") {
+      value = "0";
+    }
+
+    const percentage = parseFloat(value.replace("%", ""));
+    if (isNaN(percentage)) {
+      return;
+    }
+
+    const targetTick = profitToTick(percentage, atm);
+
+    const start = tickRangeData[0];
+    const end = tickRangeData[tickRangeData.length - 1];
+    const clampedTick = Math.min(Math.max(targetTick, start), end);
+
+    setPercentageStrikePrice(formatePercentage(tickToProfit(clampedTick, atm)));
+    handleTickChange(clampedTick);
   };
 
   const handleChartClick = (data: CategoricalChartState) => {
@@ -145,13 +188,28 @@ const SelectStrikePrice = () => {
 
       <div className="border rounded-2xl p-1 flex gap-3 items-center">
         <div className="flex justify-center text-lg font-medium border rounded-xl p-2 w-24 bg-gray-50">
-          {formatePercentage(tickToProfit(tick, atm || 0))}
+          <Input
+            value={percentageStrikePrice}
+            onFocus={(e) => e.target.select()}
+            onBlur={(e) => {
+              handlePercentageStrikePriceChange(e.target.value);
+            }}
+            onChange={(e) => {
+              const regex = /^[0-9]*\.?[0-9]*$/;
+              if (e.target.value === "" || regex.test(e.target.value)) {
+                setPercentageStrikePrice(e.target.value);
+              }
+            }}
+            className="text-center border-0 p-0 bg-transparent"
+            placeholder="0%"
+            style={{ fontSize: "1.25rem" }}
+          />
         </div>
         <div className="flex-1 mr-2">
           <Slider
             defaultValue={[tick]}
-            min={tickData?.[0] || 0}
-            max={tickData?.[tickData.length - 1] || 100}
+            min={tickRangeData?.[0] || 0}
+            max={tickRangeData?.[tickRangeData.length - 1] || 100}
             step={20}
             value={[tick]}
             onValueChange={([value]) => handleTickChange(value)}

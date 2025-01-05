@@ -16,6 +16,11 @@ export const tickToProfit = (tick: number, atm: number): number => {
   return ((tickToPrice(tick) - tickToPrice(atm)) / tickToPrice(atm)) * 100;
 };
 
+export const profitToTick = (profit: number, atm: number): number => {
+  const targetPrice = tickToPrice(atm) * (1 + profit / 100);
+  return Math.round(priceToTick(targetPrice));
+};
+
 export const tokenAmountToDecimal = (
   amount: number,
   decimals: number = 18

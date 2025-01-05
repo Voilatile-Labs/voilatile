@@ -1,23 +1,25 @@
 "use client";
 
 import Page from "./_components/common/page";
-import useGlobalStore from "@/stores/global/global-store";
-import PositionSelector from "./_components/home/position-selector/position-selector";
-import OpenPosition from "./_components/home/open-position/open-position";
+import SelectToken from "./_components/home/select-token";
+import OpenPosition from "./_components/home/open-position";
+import useLongPositionStore, {
+  CreateLongPosition,
+} from "@/stores/global/long-position-store";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface HomeProps {}
 
 const Home = ({}: HomeProps) => {
-  const { step } = useGlobalStore();
+  const { step } = useLongPositionStore();
 
   return (
     <Page>
       <div className="flex flex-col justify-center items-center p-4 py-8">
         <div className="max-w-lg w-full">
-          {step === "select-token" && <PositionSelector />}
+          {step === CreateLongPosition.SelectToken && <SelectToken />}
 
-          {step === "open-position" && <OpenPosition />}
+          {step === CreateLongPosition.OpenPosition && <OpenPosition />}
         </div>
       </div>
     </Page>

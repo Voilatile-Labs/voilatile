@@ -9,6 +9,12 @@ import { usePathname } from "next/navigation";
 import { useAccountModal, useConnectModal } from "@rainbow-me/rainbowkit";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const abril = Abril_Fatface({
   weight: "400",
@@ -17,8 +23,21 @@ const abril = Abril_Fatface({
 
 const Links = [
   {
-    label: "Manage Positions",
-    href: "/positions",
+    label: "Positions",
+    item: [
+      {
+        label: "Manage",
+        href: "/positions",
+      },
+      {
+        label: "Create",
+        href: "/positions/create",
+      },
+    ],
+  },
+  {
+    label: "Faucet",
+    href: "/faucet",
   },
 ];
 
@@ -44,18 +63,41 @@ export const Header = () => {
         </Link>
 
         <ul className="items-center gap-4 ml-9 hidden md:flex">
-          {Links.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className={clsx(
-                "text-gray-400 hover:text-gray-700",
-                pathname === link.href && "text-gray-700 font-medium"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {Links.map((link) =>
+            link.href ? (
+              <Link
+                key={link.label}
+                href={link.href}
+                className={clsx(
+                  "text-gray-400 hover:text-gray-700",
+                  pathname === link.href && "text-gray-700 font-medium"
+                )}
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <DropdownMenu key={link.label}>
+                <DropdownMenuTrigger className="text-gray-400 hover:text-gray-700">
+                  {link.label}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {link.item?.map((item) => (
+                    <DropdownMenuItem key={item.label}>
+                      <Link
+                        href={item.href}
+                        className={clsx(
+                          "w-full text-gray-400 hover:text-gray-700",
+                          pathname === item.href && "text-gray-700 font-medium"
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
+          )}
         </ul>
       </div>
 

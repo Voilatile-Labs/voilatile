@@ -3,19 +3,18 @@
 import { ChevronDown, ChevronUp, Check } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import useGlobalStore from "@/stores/global/global-store";
+import useLongPositionStore from "@/stores/global/long-position-store";
 import { formatePercentage } from "@/utils/number";
+import { data as feeTiers } from "@/constants/fee";
 
-const SelectFeeTier = () => {
+interface SelectFeeTierProps {
+  onFeeSelect: (fee: number) => void;
+}
+
+const SelectFeeTier = ({ onFeeSelect }: SelectFeeTierProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { fee, setFee } = useGlobalStore();
-
-  const feeTiers = [
-    { fee: 500, description: "Low funding fee" },
-    { fee: 3000, description: "Medium funding fee" },
-    { fee: 10000, description: "High funding fee" },
-  ];
+  const { fee } = useLongPositionStore();
 
   const selectedFeeTier =
     feeTiers.find((tier) => tier.fee === fee) || feeTiers[0];
@@ -59,12 +58,13 @@ const SelectFeeTier = () => {
             <div
               key={tier.fee}
               onClick={() => {
-                if (selectedFeeTier.fee === tier.fee) {
-                  setFee(tier.fee);
+                if (tier.disabled) {
+                  return;
                 }
+                onFeeSelect(tier.fee);
               }}
               className={`relative flex justify-between items-center p-3 border rounded-2xl hover:bg-gray-50 cursor-pointer ${
-                selectedFeeTier.fee === tier.fee ? "bg-gray-50" : " opacity-60"
+                tier.disabled ? "opacity-60" : "bg-gray-50"
               }`}
             >
               {selectedFeeTier.fee === tier.fee && (
