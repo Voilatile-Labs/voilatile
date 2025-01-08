@@ -1,176 +1,274 @@
 import { useReadContracts } from "wagmi";
 import { readContracts } from "@wagmi/core";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
 import { config } from "@/app/_containers/wallet-provider";
+import { toast } from "@/hooks/use-toast";
+import { Position } from "@/stores/global/global-store";
+import { data } from "@/constants/token";
+import { tokenAmountToDecimal } from "@/utils/currency";
+import { createPublicClient, http } from "viem";
+import { sepolia } from "viem/chains";
 
-interface PositionData {
-  positionId: number;
-  type: "long" | "short" | "liquidity";
+export interface PositionData {
+  id: number;
+  type: Position;
   tickIndex: number;
-  amount: bigint;
-  entryBlockNumber?: bigint;
-  expirationBlockNumber?: bigint;
-  qTokensEarned?: bigint;
+  startTimestamp?: number;
+  endTimestamp?: number;
+  expired?: boolean;
+  pTokenAmount: {
+    amount: string;
+    rawAmount: number;
+  };
+  qTokensAmount: {
+    amount: string;
+    rawAmount: number;
+  };
 }
 
-export const usePositions = (address: string, contractAddress: string) => {
+const publicClient = createPublicClient({
+  chain: sepolia,
+  transport: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL as string),
+});
+
+export const usePositionPeripheryContract = (
+  address: string,
+  contract: string
+) => {
   const [positions, setPositions] = useState<PositionData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  const { data: nextPositions } = useReadContracts({
+  const { data: tokens } = useReadContracts({
     contracts: [
       {
-        address: contractAddress as `0x${string}`,
+        address: contract as `0x${string}`,
+        abi: VoilatilePeripheryABI,
+        functionName: "principalToken",
+      },
+      {
+        address: contract as `0x${string}`,
+        abi: VoilatilePeripheryABI,
+        functionName: "quoteToken",
+      },
+    ],
+  });
+
+  const { pToken, qToken } = useMemo(() => {
+    if (!tokens) {
+      return { pToken: undefined, qToken: undefined };
+    }
+
+    const pToken = data.find((x) => x.contractAddress === tokens[0].result);
+    const qToken = data.find((x) => x.contractAddress === tokens[1].result);
+
+    return {
+      pToken,
+      qToken,
+    };
+  }, [tokens]);
+
+  const { data: nextPositionIds } = useReadContracts({
+    contracts: [
+      {
+        address: contract as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "nextBuyPositionId",
+        args: [address],
       },
       {
-        address: contractAddress as `0x${string}`,
-        abi: VoilatilePeripheryABI,
-        functionName: "nextSSPositionId",
-      },
-      {
-        address: contractAddress as `0x${string}`,
+        address: contract as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "nextLPPositionId",
+        args: [address],
+      },
+      {
+        address: contract as `0x${string}`,
+        abi: VoilatilePeripheryABI,
+        functionName: "nextSSPositionId",
+        args: [address],
       },
     ],
   });
 
   useEffect(() => {
     const getPositions = async () => {
-      if (!address || !nextPositions) {
+      if (!address || !nextPositionIds || !pToken || !qToken) {
         setIsLoading(false);
         return;
       }
 
       setIsLoading(true);
-      setError(null);
-
       try {
-        const [nextLongId, nextShortId, nextLiquidityId] = nextPositions.map(
-          (id) => Number(id?.result || 0)
-        );
+        const [
+          nextLongPositionId,
+          nextShortPositionId,
+          nextLiquidityPositionId,
+        ] = nextPositionIds.map((id) => Number(id?.result || 0));
 
-        const longPositionCalls = Array.from(
-          { length: nextLongId },
+        const longPositionContractOptions = Array.from(
+          { length: nextLongPositionId },
           (_, i) => ({
-            address: contractAddress as `0x${string}`,
+            address: contract as `0x${string}`,
             abi: VoilatilePeripheryABI,
             functionName: "fetchBuyPosition",
             args: [address, i],
           })
         );
 
-        const shortPositionCalls = Array.from(
-          { length: nextShortId },
+        const liquidityPositionContractOptions = Array.from(
+          { length: nextLiquidityPositionId },
           (_, i) => ({
-            address: contractAddress as `0x${string}`,
-            abi: VoilatilePeripheryABI,
-            functionName: "fetchSSPosition",
-            args: [i],
-          })
-        );
-
-        const liquidityPositionCalls = Array.from(
-          { length: nextLiquidityId },
-          (_, i) => ({
-            address: contractAddress as `0x${string}`,
+            address: contract as `0x${string}`,
             abi: VoilatilePeripheryABI,
             functionName: "fetchLPPosition",
             args: [i],
           })
         );
 
-        const allPositions = await readContracts(config, {
+        const shortPositionContractOptions = Array.from(
+          { length: nextShortPositionId },
+          (_, i) => ({
+            address: contract as `0x${string}`,
+            abi: VoilatilePeripheryABI,
+            functionName: "fetchSSPosition",
+            args: [i],
+          })
+        );
+
+        const rawPositions = await readContracts(config, {
           // @ts-expect-error Contract type mismatch with readContracts
           contracts: [
-            ...longPositionCalls,
-            ...shortPositionCalls,
-            ...liquidityPositionCalls,
+            ...longPositionContractOptions,
+            ...liquidityPositionContractOptions,
+            ...shortPositionContractOptions,
           ],
         });
 
-        if (!allPositions) {
-          throw new Error("Failed to fetch positions");
+        if (!rawPositions) {
+          toast({
+            title: "Error Fetching Positions",
+            description: "Unable to retrieve position data.",
+          });
+          setIsLoading(false);
+          return;
         }
 
-        const longPositions = allPositions
-          .slice(0, nextLongId)
-          .map((data, index) => {
-            const item = data.result as any;
-            if (!item || !item[3]) return null;
-            return {
-              positionId: index,
-              type: "long" as const,
-              tickIndex: Number(item[0] || 0),
-              entryBlockNumber: BigInt(item[1] || 0),
-              expirationBlockNumber: BigInt(item[2] || 0),
-              amount: BigInt(item[3] || 0),
-              qTokensEarned: BigInt(item[4] || 0),
-            };
-          })
-          .filter(
-            (item): item is NonNullable<typeof item> =>
-              item !== null && item.amount > 0
-          );
+        const result: PositionData[] = [];
+        for (const index in rawPositions) {
+          const rawPosition = rawPositions[index].result as any;
+          if (Number(index) < Number(nextLongPositionId)) {
+            const block = await publicClient.getBlockNumber();
+            const startBlock = await publicClient.getBlock({
+              blockNumber: BigInt(rawPosition[1]),
+            });
+            const startBlockTimestamp = Number(startBlock.timestamp);
 
-        const shortPositions = allPositions
-          .slice(nextLongId, nextLongId + nextShortId)
-          .map((data, index) => {
-            const item = data.result as any;
-            if (!item || !item[1]) return null;
-            return {
-              positionId: index,
-              type: "short" as const,
-              tickIndex: Number(item[0] || 0),
-              amount: BigInt(item[1] || 0),
-            };
-          })
-          .filter(
-            (item): item is NonNullable<typeof item> =>
-              item !== null && item.amount > 0
-          );
+            let endBlockTimestamp = 0;
+            let expired = false;
+            if (block < BigInt(rawPosition[2])) {
+              const currentBlock = await publicClient.getBlock({
+                blockNumber: block,
+              });
+              endBlockTimestamp =
+                Number(currentBlock.timestamp) +
+                12 * Number(BigInt(rawPosition[2]) - block);
+              expired = false;
+            } else {
+              const endBlock = await publicClient.getBlock({
+                blockNumber: BigInt(rawPosition[2]),
+              });
+              endBlockTimestamp = Number(endBlock.timestamp);
+              expired = true;
+            }
 
-        const liquidityPositions = allPositions
-          .slice(nextLongId + nextShortId)
-          .map((data, index) => {
-            const item = data.result as any;
-            if (!item || !item[1]) return null;
-            return {
-              positionId: index,
-              type: "liquidity" as const,
-              tickIndex: Number(item[0] || 0),
-              amount: BigInt(item[1] || 0),
-            };
-          })
-          .filter(
-            (item): item is NonNullable<typeof item> =>
-              item !== null && item.amount > 0
-          );
+            result.push({
+              id: Number(index),
+              type: Position.Long,
+              tickIndex: Number(rawPosition[0]),
+              startTimestamp: startBlockTimestamp,
+              endTimestamp: endBlockTimestamp,
+              expired,
+              pTokenAmount: {
+                amount: tokenAmountToDecimal(
+                  Number(rawPosition[3] || 0),
+                  pToken.decimals
+                ).toString(),
+                rawAmount: Number(rawPosition[3] || 0),
+              },
+              qTokensAmount: {
+                amount: tokenAmountToDecimal(
+                  Number(rawPosition[4] || 0),
+                  qToken.decimals
+                ).toString(),
+                rawAmount: Number(rawPosition[4] || 0),
+              },
+            });
+          } else if (
+            Number(index) <
+            Number(nextLongPositionId) + Number(nextLiquidityPositionId)
+          ) {
+            result.push({
+              id: Number(index),
+              type: Position.Liquidity,
+              tickIndex: Number(rawPosition[0]),
+              pTokenAmount: {
+                amount: tokenAmountToDecimal(
+                  Number(rawPosition[3] || 0),
+                  pToken.decimals
+                ).toString(),
+                rawAmount: Number(rawPosition[3] || 0),
+              },
+              qTokensAmount: {
+                amount: tokenAmountToDecimal(
+                  Number(rawPosition[4] || 0),
+                  qToken.decimals
+                ).toString(),
+                rawAmount: Number(rawPosition[4] || 0),
+              },
+            });
+          } else {
+            result.push({
+              id: Number(index),
+              type: Position.Short,
+              tickIndex: Number(rawPosition[0]),
+              pTokenAmount: {
+                amount: tokenAmountToDecimal(
+                  Number(rawPosition[3] || 0),
+                  pToken.decimals
+                ).toString(),
+                rawAmount: Number(rawPosition[3] || 0),
+              },
+              qTokensAmount: {
+                amount: tokenAmountToDecimal(
+                  Number(rawPosition[4] || 0),
+                  qToken.decimals
+                ).toString(),
+                rawAmount: Number(rawPosition[4] || 0),
+              },
+            });
+          }
+        }
 
-        setPositions([
-          ...longPositions,
-          ...shortPositions,
-          ...liquidityPositions,
-        ]);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err : new Error("Failed to fetch positions")
-        );
+        setPositions(result);
+      } catch (error) {
+        toast({
+          title: "Error Fetching Positions",
+          description: "Unable to retrieve position data.",
+        });
+        console.log("Failed:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
     getPositions();
-  }, [address, nextPositions, contractAddress]);
+  }, [address, contract, nextPositionIds, pToken, qToken]);
 
   return {
     positions,
+    pToken,
+    qToken,
     isLoading,
-    error,
   };
 };

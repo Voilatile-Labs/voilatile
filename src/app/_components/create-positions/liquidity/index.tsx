@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount, useReadContract } from "wagmi";
 import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { toast } from "@/hooks/use-toast";
 
-import useLiquidityPositionStore from "@/stores/global/liquidity-position-store";
+import useLiquidityPositionStore, {
+  initialState,
+} from "@/stores/global/liquidity-position-store";
 import SelectTokenPair from "./select-token-pair";
 import SelectPosition from "../../home/select-token/select-position";
 import SelectFeeTier from "../../home/open-position/select-fee-tier";
@@ -22,13 +24,17 @@ import {
 import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
 import { erc20Abi } from "viem";
 import { Token } from "@/constants/token";
+import { useRouter } from "next/navigation";
 
 const OpenLiquidityPosition = () => {
+  const router = useRouter();
+
   const { openConnectModal } = useConnectModal();
   const { address } = useAccount();
 
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
+  const [updateAllowance, setUpdateAllowance] = useState("");
 
   const { atm } = usePeripheryContract(
     process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
@@ -48,17 +54,18 @@ const OpenLiquidityPosition = () => {
     endTick,
   } = useLiquidityPositionStore();
 
-  const { data: longTokenAllowance } = useReadContract({
-    address: longToken?.contractAddress as `0x${string}`,
-    abi: erc20Abi,
-    functionName: "allowance",
-    args: address
-      ? [
-          address,
-          process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
-        ]
-      : undefined,
-  });
+  const { data: longTokenAllowance, refetch: refetchLongTokenAllowance } =
+    useReadContract({
+      address: longToken?.contractAddress as `0x${string}`,
+      abi: erc20Abi,
+      functionName: "allowance",
+      args: address
+        ? [
+            address,
+            process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
+          ]
+        : undefined,
+    });
 
   const hasLongTokenAllowance = useMemo(() => {
     if (!longTokenAllowance || longTokenAmount.rawAmount < 0) {
@@ -67,17 +74,18 @@ const OpenLiquidityPosition = () => {
     return longTokenAllowance >= longTokenAmount.rawAmount;
   }, [longTokenAllowance, longTokenAmount.rawAmount]);
 
-  const { data: shortTokenAllowance } = useReadContract({
-    address: shortToken?.contractAddress as `0x${string}`,
-    abi: erc20Abi,
-    functionName: "allowance",
-    args: address
-      ? [
-          address,
-          process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
-        ]
-      : undefined,
-  });
+  const { data: shortTokenAllowance, refetch: refetchShortTokenAllowance } =
+    useReadContract({
+      address: shortToken?.contractAddress as `0x${string}`,
+      abi: erc20Abi,
+      functionName: "allowance",
+      args: address
+        ? [
+            address,
+            process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
+          ]
+        : undefined,
+    });
 
   const hasShortTokenAllowance = useMemo(() => {
     if (!shortTokenAllowance || shortTokenAmount.rawAmount < 0) {
@@ -85,6 +93,13 @@ const OpenLiquidityPosition = () => {
     }
     return shortTokenAllowance >= shortTokenAmount.rawAmount;
   }, [shortTokenAllowance, shortTokenAmount.rawAmount]);
+
+  useEffect(() => {
+    if (updateAllowance) {
+      refetchLongTokenAllowance();
+      refetchShortTokenAllowance();
+    }
+  }, [updateAllowance, refetchLongTokenAllowance, refetchShortTokenAllowance]);
 
   const createAllowanceTransaction = (token: Token | undefined) => {
     if (!longToken) {
@@ -121,6 +136,7 @@ const OpenLiquidityPosition = () => {
       },
       title: "Approve Token",
       description: `Allow Voilatile to spend your ${token.symbol}.`,
+      type: "approve",
     };
   };
 
@@ -159,6 +175,7 @@ const OpenLiquidityPosition = () => {
       },
       title: "Open Liquidity Position",
       description: "Are you sure you want to open this liquidity position?",
+      type: "position",
     };
   };
 
@@ -364,10 +381,18 @@ const OpenLiquidityPosition = () => {
       {transactionData && (
         <TransactionModal
           isOpen={openTransactionModal}
-          onSuccess={() => {
-            reset();
+          onSuccess={(data, hash) => {
+            if (data.type === "approve") {
+              setUpdateAllowance(hash);
+            }
+
             setTransactionData(null);
             setOpenTransactionModal(false);
+
+            if (data.type === "position") {
+              reset(initialState);
+              router.push("/positions");
+            }
           }}
           onClose={() => {
             setTransactionData(null);

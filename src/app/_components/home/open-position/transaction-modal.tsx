@@ -15,7 +15,7 @@ import { toast } from "@/hooks/use-toast";
 interface TransactionModalProps {
   isOpen: boolean;
   data: any;
-  onSuccess: () => void;
+  onSuccess: (data: any, hash: string) => void;
   onClose: (error?: any) => void;
 }
 
@@ -37,9 +37,9 @@ const TransactionModal = ({
 
   useEffect(() => {
     if (isReceiptSuccess) {
-      onSuccess();
+      onSuccess(data, txHash as string);
     }
-  }, [isReceiptSuccess, onSuccess]);
+  }, [isReceiptSuccess, onSuccess, data, txHash]);
 
   useEffect(() => {
     if (isReceiptError) {

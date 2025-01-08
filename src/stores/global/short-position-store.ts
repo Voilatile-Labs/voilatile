@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { data as Tokens, Token } from "@/constants/token";
 import { data as FeeTiers } from "@/constants/fee";
 
-const initialState = {
+export const initialState = {
   longToken: Tokens[0],
   longTokenAmount: {
     amount: "",
@@ -44,7 +44,7 @@ interface ShortPositionStore {
   fee: number;
   setFee: (fee: number) => void;
 
-  reset: () => void;
+  reset: (state: typeof initialState) => void;
 }
 
 const useShortPositionStore = create<ShortPositionStore>((set) => ({
@@ -66,7 +66,7 @@ const useShortPositionStore = create<ShortPositionStore>((set) => ({
   fee: initialState.fee,
   setFee: (fee) => set({ fee }),
 
-  reset: () => set(initialState),
+  reset: (state) => set(state),
 }));
 
 export default useShortPositionStore;

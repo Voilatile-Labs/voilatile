@@ -1,53 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Token } from "@/constants/token";
 import Image from "next/image";
-import { tokenAmountToDecimal } from "@/utils/currency";
-import { formatePercentage } from "@/utils/number";
+import { formatePercentage, formatNumberWithDecimals } from "@/utils/number";
 import { useAccount } from "wagmi";
 import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
 import TransactionModal from "../home/open-position/transaction-modal";
 import { Button } from "@/components/ui/button";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
+import { data as FeeTiers } from "@/constants/fee";
+import { PositionData } from "@/app/_hooks/usePositionPeripheryContract";
+import { Position } from "@/stores/global/global-store";
+import { format, fromUnixTime } from "date-fns";
+import clsx from "clsx";
 
 interface PositionCardProps {
   longToken: Token;
   shortToken: Token;
-  feeTier: number;
-  position: {
-    type: string;
-    tick: number;
-    amount: bigint;
-    startBlockNumber?: bigint;
-    endBlockNumber?: bigint;
-    payout?: bigint;
-    positionId: number;
-  };
+  position: PositionData;
 }
 
 const PositionCard = ({
   longToken,
   shortToken,
-  feeTier,
   position,
 }: PositionCardProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [openTransactionModal, setOpenTransactionModal] = useState(false);
-  const [transactionData, setTransactionData] = useState<any>(null);
-
   const { address } = useAccount();
   const { openConnectModal } = useConnectModal();
 
-  const extend = async () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const [openTransactionModal, setOpenTransactionModal] = useState(false);
+  const [transactionData, setTransactionData] = useState<any>(null);
+
+  const { feeTier } = usePeripheryContract(
+    process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
+  );
+
+  const selectedFeeTier = useMemo(() => {
+    return FeeTiers.find((tier) => tier.fee === feeTier) || FeeTiers[1];
+  }, [feeTier]);
+
+  const createExtendPositionTransaction = () => {
     setTransactionData({
       contract: {
         address: process.env
           .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "extend",
-        args: [position.positionId],
+        args: [position.id],
       },
       title: "Extend Position",
       description: "Are you sure you want to extend this position?",
@@ -55,14 +59,14 @@ const PositionCard = ({
     setOpenTransactionModal(true);
   };
 
-  const sell = async () => {
+  const createSellPositionTransaction = () => {
     setTransactionData({
       contract: {
         address: process.env
           .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "sell",
-        args: [position.positionId],
+        args: [position.id],
       },
       title: "Close Position",
       description: "Are you sure you want to close this position?",
@@ -70,14 +74,14 @@ const PositionCard = ({
     setOpenTransactionModal(true);
   };
 
-  const ssClose = async () => {
+  const createSSClosePositionTransaction = () => {
     setTransactionData({
       contract: {
         address: process.env
           .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "ssClose",
-        args: [position.tick],
+        args: [position.tickIndex],
       },
       title: "Close Short Position",
       description: "Are you sure you want to close this short position?",
@@ -85,14 +89,14 @@ const PositionCard = ({
     setOpenTransactionModal(true);
   };
 
-  const lpClose = async () => {
+  const createLPClosePositionTransaction = () => {
     setTransactionData({
       contract: {
         address: process.env
           .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "LPclose",
-        args: [position.tick],
+        args: [position.tickIndex],
       },
       title: "Close LP Position",
       description: "Are you sure you want to close this LP position?",
@@ -101,7 +105,12 @@ const PositionCard = ({
   };
 
   return (
-    <div className="border rounded-xl shadow-sm hover:shadow transition-shadow p-4">
+    <div
+      className={clsx(
+        "border rounded-xl shadow-sm hover:shadow transition-shadow p-4",
+        position.expired && "border-red-200 border-2"
+      )}
+    >
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="flex -space-x-3">
@@ -144,16 +153,16 @@ const PositionCard = ({
         <div className="text-center bg-gray-50 rounded-xl py-3">
           <p className="text-xs text-gray-500">Amount</p>
           <p className="font-medium text-gray-900">
-            {`${tokenAmountToDecimal(
-              Number(position.amount),
-              longToken.decimals
-            ).toFixed(2)} ${longToken.symbol}`}
+            {`${formatNumberWithDecimals(
+              Number(position.pTokenAmount.amount),
+              6
+            )} ${longToken.symbol}`}
           </p>
         </div>
         <div className="text-center bg-gray-50 rounded-xl py-3">
           <p className="text-xs text-gray-500">Fee Rate</p>
           <p className="font-medium text-gray-900">
-            {formatePercentage(feeTier / 10000)}
+            {formatePercentage(selectedFeeTier.fee / 10000)}
           </p>
         </div>
       </div>
@@ -171,71 +180,91 @@ const PositionCard = ({
                 className="rounded-full"
               />
               <span className="text-sm font-medium text-gray-900">
-                {`${tokenAmountToDecimal(
-                  Number(position.amount),
-                  longToken.decimals
-                ).toFixed(2)}`}
+                {`${formatNumberWithDecimals(
+                  Number(position.pTokenAmount.amount),
+                  6
+                )}`}
               </span>
               <span className="text-sm font-medium text-gray-500">
                 {longToken.symbol}
               </span>
             </div>
           </div>
-          {position.startBlockNumber && (
+
+          {position.startTimestamp && (
             <div className="flex justify-between items-center">
               <span className="text-xs text-gray-500">Start Block Number</span>
               <span className="text-sm font-medium text-gray-900">
-                {position.startBlockNumber.toString()}
+                {format(fromUnixTime(position.startTimestamp), "PPpp")}
               </span>
             </div>
           )}
-          {position.endBlockNumber && (
+
+          {position.endTimestamp && (
             <div className="flex justify-between items-center">
               <span className="text-xs text-gray-500">End Block Number</span>
               <span className="text-sm font-medium text-gray-900">
-                {position.endBlockNumber.toString()}
+                {format(fromUnixTime(position.endTimestamp), "PPpp")}
               </span>
             </div>
           )}
+
           <div className="flex justify-between items-center">
             <span className="text-xs text-gray-500">Funding Fee</span>
             <span className="text-sm font-medium text-gray-900">
-              {formatePercentage(feeTier / 10000)}
+              {formatePercentage(selectedFeeTier.fee / 10000)}
             </span>
           </div>
-          {position.payout && (
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-500">Payout</span>
-              <div className="flex items-center gap-1">
-                <Image
-                  src={shortToken.image}
-                  alt={shortToken.symbol}
-                  width={20}
-                  height={20}
-                  className="rounded-full"
-                />
-                <span className="text-sm font-medium text-gray-900">
-                  {`${tokenAmountToDecimal(
-                    Number(position.payout),
-                    shortToken.decimals
-                  ).toFixed(2)}`}
-                </span>
-                <span className="text-sm font-medium text-gray-500">
-                  {shortToken.symbol}
-                </span>
-              </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-500">Payout</span>
+            <div className="flex items-center gap-1">
+              <Image
+                src={shortToken.image}
+                alt={shortToken.symbol}
+                width={20}
+                height={20}
+                className="rounded-full"
+              />
+              <span className="text-sm font-medium text-gray-900">
+                {`${formatNumberWithDecimals(
+                  Number(position.qTokensAmount.amount),
+                  6
+                )}`}
+              </span>
+              <span className="text-sm font-medium text-gray-500">
+                {shortToken.symbol}
+              </span>
             </div>
-          )}
+          </div>
 
           {address ? (
             <>
-              {position.type === "long" && (
+              {position.type === Position.Long && (
                 <div className="flex gap-2 mt-4">
-                  <Button onClick={extend} variant="outline" className="flex-1">
+                  <Button
+                    onClick={createExtendPositionTransaction}
+                    variant="outline"
+                    className="flex-1"
+                    disabled={position.expired}
+                  >
                     Extend
                   </Button>
                   <Button
-                    onClick={sell}
+                    onClick={createSellPositionTransaction}
+                    variant="destructive"
+                    className="flex-1"
+                    disabled={position.expired}
+                  >
+                    Close
+                  </Button>
+                </div>
+              )}
+
+              {position.type === Position.Short && (
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    onClick={createSSClosePositionTransaction}
                     variant="destructive"
                     className="flex-1"
                   >
@@ -244,22 +273,10 @@ const PositionCard = ({
                 </div>
               )}
 
-              {position.type === "short" && (
+              {position.type === Position.Liquidity && (
                 <div className="flex gap-2 mt-4">
                   <Button
-                    onClick={ssClose}
-                    variant="destructive"
-                    className="flex-1"
-                  >
-                    Close
-                  </Button>
-                </div>
-              )}
-
-              {position.type === "liquidity" && (
-                <div className="flex gap-2 mt-4">
-                  <Button
-                    onClick={lpClose}
+                    onClick={createLPClosePositionTransaction}
                     variant="destructive"
                     className="flex-1"
                   >
@@ -279,14 +296,20 @@ const PositionCard = ({
         </div>
       )}
 
-      <TransactionModal
-        isOpen={openTransactionModal}
-        onSuccess={() => {
-          setOpenTransactionModal(false);
-        }}
-        onClose={() => setOpenTransactionModal(false)}
-        data={transactionData}
-      />
+      {transactionData && (
+        <TransactionModal
+          isOpen={openTransactionModal}
+          onSuccess={() => {
+            setTransactionData(null);
+            setOpenTransactionModal(false);
+          }}
+          onClose={() => {
+            setTransactionData(null);
+            setOpenTransactionModal(false);
+          }}
+          data={transactionData}
+        />
+      )}
     </div>
   );
 };

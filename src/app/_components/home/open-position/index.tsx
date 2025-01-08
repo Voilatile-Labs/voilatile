@@ -9,7 +9,7 @@ import { useAccount, useReadContract } from "wagmi";
 import SelectPosition from "../select-token/select-position";
 import { tokenAmountToDecimal } from "@/utils/currency";
 import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SelectStrikePrice from "./select-strike-price";
 import TransactionModal from "./transaction-modal";
 import { erc20Abi } from "viem";
@@ -17,15 +17,21 @@ import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
 import { toast } from "@/hooks/use-toast";
 import useLongPositionStore, {
   CreateLongPosition,
+  initialState,
 } from "@/stores/global/long-position-store";
+import { useRouter } from "next/navigation";
 
 const OpenPosition = () => {
+  const router = useRouter();
+
   const { openConnectModal } = useConnectModal();
   const { address } = useAccount();
 
   const [isLoading, setIsLoading] = useState(false);
+
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
+  const [updateAllowance, setUpdateAllowance] = useState("");
 
   const { getCalculatedLongPrices } = usePeripheryContract(
     process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
@@ -45,7 +51,7 @@ const OpenPosition = () => {
     setFee,
   } = useLongPositionStore();
 
-  const { data: allowance } = useReadContract({
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: shortToken?.contractAddress as `0x${string}`,
     abi: erc20Abi,
     functionName: "allowance",
@@ -63,6 +69,12 @@ const OpenPosition = () => {
     }
     return allowance >= shortTokenAmount.rawAmount;
   }, [allowance, shortTokenAmount.rawAmount]);
+
+  useEffect(() => {
+    if (updateAllowance) {
+      refetchAllowance();
+    }
+  }, [updateAllowance, refetchAllowance]);
 
   const createAllowanceTransaction = () => {
     if (!longToken || !shortToken) {
@@ -87,6 +99,7 @@ const OpenPosition = () => {
       },
       title: "Approve Token",
       description: `Allow Voilatile to spend your ${shortToken.symbol}.`,
+      type: "approve",
     };
   };
 
@@ -125,6 +138,7 @@ const OpenPosition = () => {
       },
       title: "Open Position",
       description: "Are you sure you want to open this position?",
+      type: "position",
     };
   };
 
@@ -256,10 +270,18 @@ const OpenPosition = () => {
       {transactionData && (
         <TransactionModal
           isOpen={openTransactionModal}
-          onSuccess={() => {
-            reset();
+          onSuccess={(data, hash) => {
+            if (data.type === "approve") {
+              setUpdateAllowance(hash);
+            }
+
             setTransactionData(null);
             setOpenTransactionModal(false);
+
+            if (data.type === "position") {
+              reset({ ...initialState, step: CreateLongPosition.OpenPosition });
+              router.push("/positions");
+            }
           }}
           onClose={() => {
             setTransactionData(null);

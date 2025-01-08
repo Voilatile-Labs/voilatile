@@ -1,5 +1,8 @@
 "use client";
 
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import useGlobalStore, { Position } from "@/stores/global/global-store";
+
 // import {
 //   Select,
 //   SelectContent,
@@ -7,8 +10,6 @@
 //   SelectTrigger,
 //   SelectValue,
 // } from "@/components/ui/select";
-// import useGlobalStore, { UserPosition } from "@/stores/global/global-store";
-// import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // const sortOptions = [
 //   { value: "createdAt", label: "Creation Date" },
@@ -17,35 +18,32 @@
 // ] as const;
 
 const SelectPositionHeader = () => {
-  // const { positionType, setPositionType, sortBy, setSortBy } = useGlobalStore();
+  const { managePosition, setManagePosition } = useGlobalStore();
 
   return (
     <div className="flex flex-col gap-2">
-      {/* <Tabs
-        value={positionType}
-        onValueChange={(value) => setPositionType(value as UserPosition)}
+      <Tabs
+        value={managePosition}
+        onValueChange={(value) => setManagePosition(value as Position)}
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-3 rounded-2xl">
-          <TabsTrigger value={UserPosition.LONG} className="text-xs rounded-lg">
+          <TabsTrigger value={Position.Long} className="text-xs rounded-xl">
             Long
           </TabsTrigger>
-          <TabsTrigger
-            value={UserPosition.SHORT}
-            className="text-xs rounded-lg"
-          >
+          <TabsTrigger value={Position.Short} className="text-xs rounded-xl">
             Short
           </TabsTrigger>
           <TabsTrigger
-            value={UserPosition.LIQUIDITY}
-            className="text-xs rounded-lg"
+            value={Position.Liquidity}
+            className="text-xs rounded-xl"
           >
             Liquidity
           </TabsTrigger>
         </TabsList>
       </Tabs>
 
-      <div className="flex items-center gap-4 justify-end">
+      {/* <div className="flex items-center gap-4 justify-end">
         <label className="text-xs text-gray-400">Sort by:</label>
         <Select
           value={sortBy}

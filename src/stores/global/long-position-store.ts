@@ -7,7 +7,7 @@ export enum CreateLongPosition {
   OpenPosition = "open-position",
 }
 
-const initialState = {
+export const initialState = {
   step: CreateLongPosition.SelectToken,
   longToken: Tokens[0],
   longTokenAmount: {
@@ -53,7 +53,7 @@ interface LongPositionStore {
   fee: number;
   setFee: (fee: number) => void;
 
-  reset: () => void;
+  reset: (state: typeof initialState) => void;
 }
 
 const useLongPositionStore = create<LongPositionStore>((set) => ({
@@ -78,7 +78,7 @@ const useLongPositionStore = create<LongPositionStore>((set) => ({
   fee: initialState.fee,
   setFee: (fee) => set({ fee }),
 
-  reset: () => set(initialState),
+  reset: (state) => set(state),
 }));
 
 export default useLongPositionStore;

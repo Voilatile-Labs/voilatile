@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount, useReadContract } from "wagmi";
 import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "@/hooks/use-toast";
 
 import SelectPosition from "../../home/select-token/select-position";
 import TransactionModal from "../../home/open-position/transaction-modal";
-import useShortPositionStore from "@/stores/global/short-position-store";
+import useShortPositionStore, {
+  initialState,
+} from "@/stores/global/short-position-store";
 import SelectFeeTier from "../../home/open-position/select-fee-tier";
 import SelectTokenPair from "./select-token-pair";
 import SelectStrikePrice from "./select-strike-price";
@@ -18,14 +20,19 @@ import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
 import { tokenAmountToDecimal } from "@/utils/currency";
 import { tickToPrice } from "@/utils/currency";
 import { defaultShortToken } from "@/constants/token";
+import { useRouter } from "next/navigation";
 
 const OpenShortPosition = () => {
+  const router = useRouter();
+
   const { openConnectModal } = useConnectModal();
   const { address } = useAccount();
 
   const [isLoading, setIsLoading] = useState(false);
+
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
+  const [updateAllowance, setUpdateAllowance] = useState("");
 
   const { atm } = usePeripheryContract(
     process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
@@ -45,7 +52,7 @@ const OpenShortPosition = () => {
     setFee,
   } = useShortPositionStore();
 
-  const { data: allowance } = useReadContract({
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: shortToken?.contractAddress as `0x${string}`,
     abi: erc20Abi,
     functionName: "allowance",
@@ -63,6 +70,12 @@ const OpenShortPosition = () => {
     }
     return allowance >= shortTokenAmount.rawAmount;
   }, [allowance, shortTokenAmount.rawAmount]);
+
+  useEffect(() => {
+    if (updateAllowance) {
+      refetchAllowance();
+    }
+  }, [updateAllowance, refetchAllowance]);
 
   const createAllowanceTransaction = () => {
     if (!longToken || !shortToken) {
@@ -87,6 +100,7 @@ const OpenShortPosition = () => {
       },
       title: "Approve Token",
       description: `Allow Voilatile to spend your ${shortToken.symbol}.`,
+      type: "approve",
     };
   };
 
@@ -125,6 +139,7 @@ const OpenShortPosition = () => {
       },
       title: "Open Short Position",
       description: "Are you sure you want to open this short position?",
+      type: "position",
     };
   };
 
@@ -252,10 +267,18 @@ const OpenShortPosition = () => {
       {transactionData && (
         <TransactionModal
           isOpen={openTransactionModal}
-          onSuccess={() => {
-            reset();
+          onSuccess={(data, hash) => {
+            if (data.type === "approve") {
+              setUpdateAllowance(hash);
+            }
+
             setTransactionData(null);
             setOpenTransactionModal(false);
+
+            if (data.type === "position") {
+              reset(initialState);
+              router.push("/positions");
+            }
           }}
           onClose={() => {
             setTransactionData(null);
