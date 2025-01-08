@@ -7,6 +7,7 @@ import { Abril_Fatface } from "next/font/google";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAccountModal, useConnectModal } from "@rainbow-me/rainbowkit";
+import { Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetHeader,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const abril = Abril_Fatface({
   weight: "400",
@@ -101,7 +109,7 @@ export const Header = () => {
         </ul>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-1">
         {address ? (
           <Button
             onClick={openAccountModal}
@@ -120,6 +128,57 @@ export const Header = () => {
             Connect
           </Button>
         )}
+        <Sheet>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl">
+            <SheetHeader>
+              <SheetTitle>Menu</SheetTitle>
+            </SheetHeader>
+
+            <nav className="flex flex-col gap-2 pt-4">
+              {Links.map((link) =>
+                link.href ? (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className={clsx(
+                      "flex items-center gap-2 text-gray-400 hover:text-gray-700 text-base py-2 px-4 rounded-lg transition-colors",
+                      pathname === link.href &&
+                        "text-gray-700 font-medium bg-gray-50"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <div key={link.label} className="flex flex-col">
+                    <span className="text-gray-500 text-base font-medium px-4 py-1">
+                      {link.label}
+                    </span>
+                    <div className="flex flex-col mt-1">
+                      {link.item?.map((item) => (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          className={clsx(
+                            "flex items-center gap-2 text-gray-400 hover:text-gray-700 text-base py-2 px-6 rounded-lg transition-colors",
+                            pathname === item.href &&
+                              "text-gray-700 font-medium bg-gray-50"
+                          )}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )
+              )}
+            </nav>
+          </SheetContent>
+        </Sheet>
       </div>
     </nav>
   );
