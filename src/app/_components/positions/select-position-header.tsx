@@ -1,27 +1,27 @@
 "use client";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import useGlobalStore, { UserPosition } from "@/stores/global/global-store";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+// import useGlobalStore, { UserPosition } from "@/stores/global/global-store";
+// import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const sortOptions = [
-  { value: "createdAt", label: "Creation Date" },
-  { value: "expiryDate", label: "Expiry Date" },
-  { value: "fundingFee", label: "Funding Fee" },
-] as const;
+// const sortOptions = [
+//   { value: "createdAt", label: "Creation Date" },
+//   { value: "expiryDate", label: "Expiry Date" },
+//   { value: "fundingFee", label: "Funding Fee" },
+// ] as const;
 
 const SelectPositionHeader = () => {
-  const { positionType, setPositionType, sortBy, setSortBy } = useGlobalStore();
+  // const { positionType, setPositionType, sortBy, setSortBy } = useGlobalStore();
 
   return (
     <div className="flex flex-col gap-2">
-      <Tabs
+      {/* <Tabs
         value={positionType}
         onValueChange={(value) => setPositionType(value as UserPosition)}
         className="w-full"
@@ -68,7 +68,7 @@ const SelectPositionHeader = () => {
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </div> */}
     </div>
   );
 };
