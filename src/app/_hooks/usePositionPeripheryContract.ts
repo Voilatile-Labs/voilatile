@@ -85,6 +85,7 @@ export const usePositions = (address: string, contractAddress: string) => {
         );
 
         const allPositions = await readContracts(config, {
+          // @ts-expect-error Contract type mismatch with readContracts
           contracts: [
             ...longPositionCalls,
             ...shortPositionCalls,

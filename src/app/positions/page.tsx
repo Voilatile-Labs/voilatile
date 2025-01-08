@@ -1,12 +1,12 @@
 "use client";
 
 import Page from "../_components/common/page";
-import PositionCard from "../_components/positions/position-card";
-import SelectPositionHeader from "../_components/positions/select-position-header";
-import useGlobalStore from "@/stores/global/global-store";
+// import PositionCard from "../_components/positions/position-card";
+// import SelectPositionHeader from "../_components/positions/select-position-header";
+// import useGlobalStore from "@/stores/global/global-store";
 // import { usePositions } from "@/hooks/usePositions";
 // import { useAccount } from "wagmi";
-import { data as Tokens } from "@/constants/token";
+// import { data as Tokens } from "@/constants/token";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface PositionsProps {}
@@ -37,32 +37,32 @@ const Positions = ({}: PositionsProps) => {
   //   );
   // }, [quoteToken]);
 
-  const testFeeTier = 10000;
-  const testLongToken = Tokens[0];
-  const testShortToken = Tokens[1];
-  const testData = [
-    {
-      positionId: 1,
-      entryBlockNumber: BigInt(100),
-      expirationBlockNumber: BigInt(200),
-      type: "long",
-      tickIndex: 1000,
-      amount: BigInt("1000000000000000000"),
-      qTokensEarned: BigInt("1000000000000000000"),
-    },
-    {
-      positionId: 2,
-      type: "short",
-      tickIndex: 2000,
-      amount: BigInt("2000000000000000000"),
-    },
-    {
-      positionId: 3,
-      type: "liquidity",
-      tickIndex: 3000,
-      amount: BigInt("3000000000000000000"),
-    },
-  ];
+  // const testFeeTier = 10000;
+  // const testLongToken = Tokens[0];
+  // const testShortToken = Tokens[1];
+  // const testData = [
+  //   {
+  //     positionId: 1,
+  //     entryBlockNumber: BigInt(100),
+  //     expirationBlockNumber: BigInt(200),
+  //     type: "long",
+  //     tickIndex: 1000,
+  //     amount: BigInt("1000000000000000000"),
+  //     qTokensEarned: BigInt("1000000000000000000"),
+  //   },
+  //   {
+  //     positionId: 2,
+  //     type: "short",
+  //     tickIndex: 2000,
+  //     amount: BigInt("2000000000000000000"),
+  //   },
+  //   {
+  //     positionId: 3,
+  //     type: "liquidity",
+  //     tickIndex: 3000,
+  //     amount: BigInt("3000000000000000000"),
+  //   },
+  // ];
 
   return (
     <Page>
