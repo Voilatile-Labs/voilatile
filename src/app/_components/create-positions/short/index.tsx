@@ -1,25 +1,25 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import SelectTokenPair from "./select-token-pair";
-import SelectFeeTier from "./select-fee-tier";
 import { useAccount, useReadContract } from "wagmi";
-import SelectPosition from "../select-token/select-position";
-import { tokenAmountToDecimal } from "@/utils/currency";
 import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
 import { useMemo, useState } from "react";
+import { toast } from "@/hooks/use-toast";
+
+import SelectPosition from "../../home/select-token/select-position";
+import TransactionModal from "../../home/open-position/transaction-modal";
+import useShortPositionStore from "@/stores/global/short-position-store";
+import SelectFeeTier from "../../home/open-position/select-fee-tier";
+import SelectTokenPair from "./select-token-pair";
 import SelectStrikePrice from "./select-strike-price";
-import TransactionModal from "./transaction-modal";
 import { erc20Abi } from "viem";
 import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
-import { toast } from "@/hooks/use-toast";
-import useLongPositionStore, {
-  CreateLongPosition,
-} from "@/stores/global/long-position-store";
+import { tokenAmountToDecimal } from "@/utils/currency";
+import { tickToPrice } from "@/utils/currency";
+import { defaultShortToken } from "@/constants/token";
 
-const OpenPosition = () => {
+const OpenShortPosition = () => {
   const { openConnectModal } = useConnectModal();
   const { address } = useAccount();
 
@@ -27,14 +27,14 @@ const OpenPosition = () => {
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
 
-  const { getCalculatedLongPrices } = usePeripheryContract(
+  const { atm } = usePeripheryContract(
     process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
   );
 
   const {
-    setStep,
     longToken,
     shortToken,
+    setShortToken,
     setLongTokenAmount,
     setShortTokenAmount,
     tick,
@@ -43,7 +43,7 @@ const OpenPosition = () => {
     reset,
     fee,
     setFee,
-  } = useLongPositionStore();
+  } = useShortPositionStore();
 
   const { data: allowance } = useReadContract({
     address: shortToken?.contractAddress as `0x${string}`,
@@ -120,11 +120,11 @@ const OpenPosition = () => {
         address: process.env
           .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
         abi: VoilatilePeripheryABI,
-        functionName: "buy",
+        functionName: "ss",
         args: [tick, longTokenAmount.rawAmount],
       },
-      title: "Open Position",
-      description: "Are you sure you want to open this position?",
+      title: "Open Short Position",
+      description: "Are you sure you want to open this short position?",
     };
   };
 
@@ -132,78 +132,74 @@ const OpenPosition = () => {
     <div className="w-full">
       <div className="rounded-2xl bg-white shadow-sm p-4 max-w-lg w-full border flex flex-col gap-4">
         <div className="flex items-center justify-center gap-4 mb-4 relative">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setStep(CreateLongPosition.SelectToken)}
-            className="h-8 w-8 absolute left-0"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h2 className="text-lg font-semibold">Open Trade Position</h2>
+          <h2 className="text-lg font-semibold">Open Short Position</h2>
         </div>
 
         <SelectTokenPair />
 
-        <div className="w-full">
-          <h3 className="text-xs font-medium mb-2">Enter Amount</h3>
+        <SelectPosition
+          token={longToken}
+          amount={longTokenAmount}
+          onAmountChange={async (amount, rawAmount) => {
+            if (!shortToken) {
+              toast({
+                title: "Token Required",
+                description: "Please select a short token first",
+              });
+              return;
+            }
 
-          <SelectPosition
-            token={longToken}
-            amount={longTokenAmount}
-            allowTokenChange={false}
-            onAmountChange={async (amount, rawAmount) => {
-              if (!shortToken) {
-                toast({
-                  title: "Token Required",
-                  description: "Please select a short token first",
-                });
-                return;
-              }
+            setLongTokenAmount({ amount, rawAmount });
 
-              setLongTokenAmount({ amount, rawAmount });
+            if (!amount) {
+              setShortTokenAmount({ amount: "", rawAmount: 0 });
+              return;
+            }
 
-              if (!amount) {
-                setShortTokenAmount({ amount: "", rawAmount: 0 });
-                return;
-              }
-
+            try {
               setIsLoading(true);
-              try {
-                const longPrices = await getCalculatedLongPrices([tick]);
 
-                if (longPrices) {
-                  const shortTokenRawAmount = Math.floor(
-                    rawAmount * longPrices[0]
-                  );
-
-                  setShortTokenAmount({
-                    amount: tokenAmountToDecimal(
-                      shortTokenRawAmount,
-                      shortToken.decimals
-                    ).toString(),
-                    rawAmount: shortTokenRawAmount,
-                  });
-                }
-              } catch (error) {
-                toast({
-                  title: "Calculation Error",
-                  description: "Failed to calculate token amount.",
-                });
-                console.log("Failed:", error);
-              } finally {
-                setIsLoading(false);
+              if (!atm || !tick) {
+                return;
               }
-            }}
-          />
-        </div>
+
+              if (tick >= atm) {
+                setShortToken(longToken);
+                setShortTokenAmount({
+                  amount: amount,
+                  rawAmount: rawAmount,
+                });
+              } else {
+                setShortToken(defaultShortToken);
+                const shortTokenRawAmount = Math.floor(
+                  rawAmount * tickToPrice(tick)
+                );
+
+                setShortTokenAmount({
+                  amount: tokenAmountToDecimal(
+                    shortTokenRawAmount,
+                    shortToken.decimals
+                  ).toString(),
+                  rawAmount: shortTokenRawAmount,
+                });
+              }
+            } catch (error) {
+              toast({
+                title: "Calculation Error",
+                description: "Failed to calculate token amount.",
+              });
+              console.log("Failed:", error);
+            } finally {
+              setIsLoading(false);
+            }
+          }}
+        />
 
         <SelectFeeTier fee={fee} onFeeSelect={setFee} />
 
         <SelectStrikePrice />
 
         <div className="w-full">
-          <h3 className="text-xs font-medium mb-2">Deposit Amount</h3>
           <SelectPosition
             token={shortToken}
             amount={shortTokenAmount}
@@ -249,7 +245,7 @@ const OpenPosition = () => {
           onClick={openConnectModal}
           className="rounded-2xl w-full mt-4 h-12 text-base"
         >
-          Connect
+          Connect Wallet
         </Button>
       )}
 
@@ -272,4 +268,4 @@ const OpenPosition = () => {
   );
 };
 
-export default OpenPosition;
+export default OpenShortPosition;

@@ -88,7 +88,7 @@ const SelectToken = () => {
                 title: "Calculation Error",
                 description: "Failed to calculate token amount.",
               });
-              console.error("Failed:", error);
+              console.log("Failed:", error);
             } finally {
               setIsLoading(false);
             }

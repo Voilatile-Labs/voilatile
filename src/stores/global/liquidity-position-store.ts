@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { data as Tokens, Token } from "@/constants/token";
+import { data as FeeTiers } from "@/constants/fee";
 
 const initialState = {
   longToken: Tokens[0],
@@ -14,8 +15,10 @@ const initialState = {
     rawAmount: 0,
   },
 
-  tick: 0,
-  fee: 0,
+  startTick: 0,
+  endTick: 0,
+
+  fee: FeeTiers[1].fee,
 };
 
 interface LiquidityPositionStore {
@@ -37,8 +40,11 @@ interface LiquidityPositionStore {
   };
   setShortTokenAmount: (amount: { amount: string; rawAmount: number }) => void;
 
-  tick: number;
-  setTick: (tick: number) => void;
+  startTick: number;
+  setStartTick: (tick: number) => void;
+
+  endTick: number;
+  setEndTick: (tick: number) => void;
 
   fee: number;
   setFee: (fee: number) => void;
@@ -59,8 +65,11 @@ const useLiquidityPositionStore = create<LiquidityPositionStore>((set) => ({
   shortTokenAmount: initialState.shortTokenAmount,
   setShortTokenAmount: (amount) => set({ shortTokenAmount: amount }),
 
-  tick: initialState.tick,
-  setTick: (tick) => set({ tick }),
+  startTick: initialState.startTick,
+  setStartTick: (tick) => set({ startTick: tick }),
+
+  endTick: initialState.endTick,
+  setEndTick: (tick) => set({ endTick: tick }),
 
   fee: initialState.fee,
   setFee: (fee) => set({ fee }),

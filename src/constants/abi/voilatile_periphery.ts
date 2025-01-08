@@ -984,4 +984,4 @@ export const VoilatilePeripheryABI = [
     stateMutability: "nonpayable",
     type: "function",
   },
-] as const;
+];

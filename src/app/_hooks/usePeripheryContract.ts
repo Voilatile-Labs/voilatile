@@ -66,22 +66,63 @@ export const usePeripheryContract = (contract: string) => {
     try {
       const contracts = tickIndexes.map((tickIndex) => ({
         address: contract as `0x${string}`,
-        abi: VoilatilePeripheryABI,
+        abi: VoilatilePeripheryABI as any,
         functionName: "fetchLongPrice",
-        args: [BigInt(tickIndex.toString())],
+        args: [tickIndex],
       }));
 
       const results = await readContracts(config, {
         contracts,
       });
 
-      return results.map((result) => result.result && Number(result.result));
+      return results.map((result) => {
+        if (result.result) {
+          return Number(result.result);
+        }
+        return null;
+      });
     } catch (error) {
       toast({
         title: "Error Fetching Prices",
         description: "Unable to retrieve the long position prices.",
       });
-      console.error("Failed:", error);
+      console.log("Failed:", error);
+      return;
+    }
+  };
+
+  const getContractUtilization = async (tickIndexes: number[]) => {
+    if (!atm) return [];
+
+    try {
+      const contracts = tickIndexes.map((tickIndex) => ({
+        address: contract as `0x${string}`,
+        abi: VoilatilePeripheryABI as any,
+        functionName: "fetchUtilization",
+        args: [tickIndex],
+      }));
+
+      const results = await readContracts(config, {
+        contracts,
+      });
+
+      return results.map((result) => {
+        if (result.result) {
+          const [numerator, denominator] = result.result as [bigint, bigint];
+          return {
+            numerator: Number(numerator),
+            denominator: Number(denominator),
+            utilization: Number(numerator) / (Number(denominator) || 1),
+          };
+        }
+        return null;
+      });
+    } catch (error) {
+      toast({
+        title: "Error Fetching Utilization",
+        description: "Unable to retrieve the utilization rates.",
+      });
+      console.log("Failed:", error);
       return;
     }
   };
@@ -93,5 +134,6 @@ export const usePeripheryContract = (contract: string) => {
     atm,
     getCalculatedLongPrices,
     getContractLongPrices,
+    getContractUtilization,
   };
 };

@@ -21,7 +21,7 @@ export async function GET() {
 
     return NextResponse.json(priceMap);
   } catch (error) {
-    console.error("Failed:", error);
+    console.log("Failed:", error);
     return NextResponse.json(
       { error: "Failed to fetch current token prices." },
       { status: 500 }

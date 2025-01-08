@@ -1,9 +1,8 @@
 import { useReadContracts } from "wagmi";
 import { readContracts } from "@wagmi/core";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
 import { config } from "@/app/_containers/wallet-provider";
-// import { UserPosition } from "@/stores/global/global-store";
 
 interface PositionData {
   positionId: number;
@@ -17,37 +16,8 @@ interface PositionData {
 
 export const usePositions = (address: string, contractAddress: string) => {
   const [positions, setPositions] = useState<PositionData[]>([]);
-
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-
-  const { data: contractInfo } = useReadContracts({
-    contracts: [
-      {
-        address: contractAddress as `0x${string}`,
-        abi: VoilatilePeripheryABI,
-        functionName: "feeTier",
-      },
-      {
-        address: contractAddress as `0x${string}`,
-        abi: VoilatilePeripheryABI,
-        functionName: "principalToken",
-      },
-      {
-        address: contractAddress as `0x${string}`,
-        abi: VoilatilePeripheryABI,
-        functionName: "quoteToken",
-      },
-    ],
-  });
-
-  const { feeTier, principalToken, quoteToken } = useMemo(() => {
-    return {
-      feeTier: contractInfo?.[0]?.result,
-      principalToken: contractInfo?.[1]?.result,
-      quoteToken: contractInfo?.[2]?.result,
-    };
-  }, [contractInfo]);
 
   const { data: nextPositions } = useReadContracts({
     contracts: [
@@ -72,6 +42,7 @@ export const usePositions = (address: string, contractAddress: string) => {
   useEffect(() => {
     const getPositions = async () => {
       if (!address || !nextPositions) {
+        setIsLoading(false);
         return;
       }
 
@@ -98,7 +69,7 @@ export const usePositions = (address: string, contractAddress: string) => {
           (_, i) => ({
             address: contractAddress as `0x${string}`,
             abi: VoilatilePeripheryABI,
-            functionName: "ssPositions",
+            functionName: "fetchSSPosition",
             args: [i],
           })
         );
@@ -108,7 +79,7 @@ export const usePositions = (address: string, contractAddress: string) => {
           (_, i) => ({
             address: contractAddress as `0x${string}`,
             abi: VoilatilePeripheryABI,
-            functionName: "lpPositions",
+            functionName: "fetchLPPosition",
             args: [i],
           })
         );
@@ -125,47 +96,59 @@ export const usePositions = (address: string, contractAddress: string) => {
           throw new Error("Failed to fetch positions");
         }
 
-        const longPositions: PositionData[] = allPositions
+        const longPositions = allPositions
           .slice(0, nextLongId)
           .map((data, index) => {
             const item = data.result as any;
+            if (!item || !item[3]) return null;
             return {
               positionId: index,
-              type: "long",
-              tickIndex: Number(item?.[0] || 0),
-              entryBlockNumber: BigInt(item?.[1] || 0),
-              expirationBlockNumber: BigInt(item?.[2] || 0),
-              amount: BigInt(item?.[3] || 0),
-              qTokensEarned: BigInt(item?.[4] || 0),
-            } as PositionData;
+              type: "long" as const,
+              tickIndex: Number(item[0] || 0),
+              entryBlockNumber: BigInt(item[1] || 0),
+              expirationBlockNumber: BigInt(item[2] || 0),
+              amount: BigInt(item[3] || 0),
+              qTokensEarned: BigInt(item[4] || 0),
+            };
           })
-          .filter((item) => item && item.amount > 0);
+          .filter(
+            (item): item is NonNullable<typeof item> =>
+              item !== null && item.amount > 0
+          );
 
-        const shortPositions: PositionData[] = allPositions
+        const shortPositions = allPositions
           .slice(nextLongId, nextLongId + nextShortId)
           .map((data, index) => {
             const item = data.result as any;
+            if (!item || !item[1]) return null;
             return {
               positionId: index,
-              type: "short",
-              tickIndex: Number(item?.[0] || 0),
-              amount: BigInt(item?.[1] || 0),
-            } as PositionData;
+              type: "short" as const,
+              tickIndex: Number(item[0] || 0),
+              amount: BigInt(item[1] || 0),
+            };
           })
-          .filter((pos) => pos && pos.amount > 0);
+          .filter(
+            (item): item is NonNullable<typeof item> =>
+              item !== null && item.amount > 0
+          );
 
-        const liquidityPositions: PositionData[] = allPositions
+        const liquidityPositions = allPositions
           .slice(nextLongId + nextShortId)
           .map((data, index) => {
             const item = data.result as any;
+            if (!item || !item[1]) return null;
             return {
               positionId: index,
-              type: "liquidity",
-              tickIndex: Number(item?.[0] || 0),
-              amount: BigInt(item?.[1] || 0),
-            } as PositionData;
+              type: "liquidity" as const,
+              tickIndex: Number(item[0] || 0),
+              amount: BigInt(item[1] || 0),
+            };
           })
-          .filter((pos) => pos && pos.amount > 0);
+          .filter(
+            (item): item is NonNullable<typeof item> =>
+              item !== null && item.amount > 0
+          );
 
         setPositions([
           ...longPositions,
@@ -188,8 +171,5 @@ export const usePositions = (address: string, contractAddress: string) => {
     positions,
     isLoading,
     error,
-    feeTier,
-    principalToken,
-    quoteToken,
   };
 };

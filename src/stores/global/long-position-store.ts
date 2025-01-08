@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { data as Tokens, Token } from "@/constants/token";
+import { data as FeeTiers } from "@/constants/fee";
 
 export enum CreateLongPosition {
   SelectToken = "select-token",
@@ -21,7 +22,7 @@ const initialState = {
   },
 
   tick: 0,
-  fee: 0,
+  fee: FeeTiers[1].fee,
 };
 
 interface LongPositionStore {

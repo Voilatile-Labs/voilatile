@@ -11,7 +11,6 @@ import {
   ReferenceDot,
   ReferenceLine,
 } from "recharts";
-import useLongPositionStore from "@/stores/global/long-position-store";
 import { CategoricalChartState } from "recharts/types/chart/types";
 import { formatNumberWithDecimals, formatePercentage } from "@/utils/number";
 import { usePeripheryContract } from "@/app/_hooks/usePeripheryContract";
@@ -25,6 +24,8 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { toast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import useShortPositionStore from "@/stores/global/short-position-store";
+import { defaultShortToken } from "@/constants/token";
 
 const SelectStrikePrice = () => {
   const {
@@ -32,9 +33,10 @@ const SelectStrikePrice = () => {
     tick,
     setTick,
     shortToken,
+    setShortToken,
     longTokenAmount,
     setShortTokenAmount,
-  } = useLongPositionStore();
+  } = useShortPositionStore();
 
   const { atm, getCalculatedLongPrices } = usePeripheryContract(
     process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
@@ -71,7 +73,8 @@ const SelectStrikePrice = () => {
       }
 
       const atmLongPrices = await getCalculatedLongPrices([tick]);
-      const atmLongPrice = atmLongPrices?.[0] || null;
+      const atmLongPrice = atmLongPrices?.[0] || 0;
+      const atmShortPrice = tickToPrice(atm) - atmLongPrice;
 
       const calculatedTickRange = tickRangeData.map(
         (xTick) => atm + (tick - xTick)
@@ -80,7 +83,7 @@ const SelectStrikePrice = () => {
         calculatedTickRange
       );
 
-      if (!atmLongPrice || !tickRangeLongPrices) {
+      if (!atmShortPrice || !tickRangeLongPrices) {
         return [];
       }
 
@@ -91,12 +94,15 @@ const SelectStrikePrice = () => {
           ((atmTickPrice * tickToPrice(tick - atm)) /
             (atmTickPrice * tickToPrice(atm + (tick - xTick) - atm)));
 
+        const xTickShortPrice =
+          atmTickPrice * tickToPrice(xTick - atm) - xTickLongPrice;
+
         const xTickProfit =
-          ((tickRangeLongPrices[i] - atmLongPrice) / atmLongPrice) * 100;
+          ((xTickShortPrice - atmShortPrice) / atmShortPrice) * 100;
 
         return {
           tick: xTick,
-          price: xTickLongPrice,
+          price: xTickShortPrice,
           profit: xTickProfit,
         };
       });
@@ -124,12 +130,16 @@ const SelectStrikePrice = () => {
       return;
     }
 
-    const tickLongPrices = await getCalculatedLongPrices([value]);
-    const tickLongPrice = tickLongPrices?.[0] || null;
-
-    if (tickLongPrice) {
+    if (value >= atm) {
+      setShortToken(longToken);
+      setShortTokenAmount({
+        amount: longTokenAmount.amount,
+        rawAmount: longTokenAmount.rawAmount,
+      });
+    } else {
+      setShortToken(defaultShortToken);
       const shortTokenRawAmount = Math.floor(
-        longTokenAmount.rawAmount * tickLongPrice
+        longTokenAmount.rawAmount * tickToPrice(value)
       );
 
       setShortTokenAmount({
@@ -265,7 +275,7 @@ const SelectStrikePrice = () => {
                 return [
                   <>
                     <div>PnL: {formatePercentage(value)}</div>
-                    <div>Long Price: {formatNumberWithDecimals(price)}x</div>
+                    <div>Short Price: {formatNumberWithDecimals(price)}x</div>
                   </>,
                 ];
               }}

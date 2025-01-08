@@ -3,21 +3,19 @@
 import { ChevronDown, ChevronUp, Check } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import useLongPositionStore from "@/stores/global/long-position-store";
 import { formatePercentage } from "@/utils/number";
-import { data as feeTiers } from "@/constants/fee";
+import { data as FeeTiers } from "@/constants/fee";
 
 interface SelectFeeTierProps {
+  fee: number;
   onFeeSelect: (fee: number) => void;
 }
 
-const SelectFeeTier = ({ onFeeSelect }: SelectFeeTierProps) => {
+const SelectFeeTier = ({ fee, onFeeSelect }: SelectFeeTierProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { fee } = useLongPositionStore();
-
   const selectedFeeTier =
-    feeTiers.find((tier) => tier.fee === fee) || feeTiers[0];
+    FeeTiers.find((tier) => tier.fee === fee) || FeeTiers[1];
 
   return (
     <div className="w-full">
@@ -54,7 +52,7 @@ const SelectFeeTier = ({ onFeeSelect }: SelectFeeTierProps) => {
 
       {isExpanded && (
         <div className="grid grid-cols-3 gap-2 mt-2">
-          {feeTiers.map((tier) => (
+          {FeeTiers.map((tier) => (
             <div
               key={tier.fee}
               onClick={() => {

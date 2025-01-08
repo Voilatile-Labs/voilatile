@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { data as Tokens, Token } from "@/constants/token";
+import { data as FeeTiers } from "@/constants/fee";
 
 const initialState = {
   longToken: Tokens[0],
@@ -15,7 +16,7 @@ const initialState = {
   },
 
   tick: 0,
-  fee: 0,
+  fee: FeeTiers[1].fee,
 };
 
 interface ShortPositionStore {

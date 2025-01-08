@@ -32,3 +32,6 @@ export const data: Token[] = [
     searchId: "3408",
   },
 ];
+
+export const defaultLongToken: Token = data[0];
+export const defaultShortToken: Token = data[1];

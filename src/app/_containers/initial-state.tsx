@@ -3,13 +3,23 @@
 import { useEffect } from "react";
 import { usePeripheryContract } from "../_hooks/usePeripheryContract";
 import useLongPositionStore from "@/stores/global/long-position-store";
+import useLiquidityPositionStore from "@/stores/global/liquidity-position-store";
+import useShortPositionStore from "@/stores/global/short-position-store";
 
 interface InitialStateProviderProps {
   children: React.ReactNode;
 }
 
 const InitialStateProvider = ({ children }: InitialStateProviderProps) => {
-  const { setFee, setTick } = useLongPositionStore();
+  const { setFee: setLongFee, setTick: setLongTick } = useLongPositionStore();
+  const {
+    setFee: setLiquidityFee,
+    setStartTick: setLiquidityStartTick,
+    setEndTick: setLiquidityEndTick,
+  } = useLiquidityPositionStore();
+
+  const { setFee: setShortFee, setTick: setShortTick } =
+    useShortPositionStore();
 
   const { feeTier, atm } = usePeripheryContract(
     process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
@@ -17,15 +27,26 @@ const InitialStateProvider = ({ children }: InitialStateProviderProps) => {
 
   useEffect(() => {
     if (feeTier) {
-      setFee(Number(feeTier));
+      setLongFee(Number(feeTier));
+      setLiquidityFee(Number(feeTier));
+      setShortFee(Number(feeTier));
     }
-  }, [feeTier, setFee]);
+  }, [feeTier, setLongFee, setLiquidityFee, setShortFee]);
 
   useEffect(() => {
     if (atm) {
-      setTick(atm);
+      setLongTick(atm);
+      setLiquidityStartTick(atm - 500);
+      setLiquidityEndTick(atm + 500);
+      setShortTick(atm);
     }
-  }, [atm, setTick]);
+  }, [
+    atm,
+    setLongTick,
+    setLiquidityStartTick,
+    setLiquidityEndTick,
+    setShortTick,
+  ]);
 
   return <>{children}</>;
 };

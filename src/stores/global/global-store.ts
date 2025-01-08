@@ -7,22 +7,30 @@ export enum Position {
 }
 
 const initialGlobalStoreState = {
-  positionType: Position.Long,
+  createPosition: Position.Liquidity,
+
+  managePosition: Position.Long,
 
   tokenPriceMap: {},
 };
 
 interface GlobalStore {
-  positionType: Position;
-  setPositionType: (option: Position) => void;
+  createPosition: Position;
+  setCreatePosition: (option: Position) => void;
+
+  managePosition: Position;
+  setManagePosition: (option: Position) => void;
 
   tokenPriceMap: Record<string, number>;
   setTokenPriceMap: (tokenPriceMap: Record<string, number>) => void;
 }
 
 const useGlobalStore = create<GlobalStore>((set) => ({
-  positionType: initialGlobalStoreState.positionType,
-  setPositionType: (option: Position) => set({ positionType: option }),
+  createPosition: initialGlobalStoreState.createPosition,
+  setCreatePosition: (option: Position) => set({ createPosition: option }),
+
+  managePosition: initialGlobalStoreState.managePosition,
+  setManagePosition: (option: Position) => set({ managePosition: option }),
 
   tokenPriceMap: initialGlobalStoreState.tokenPriceMap,
   setTokenPriceMap: (tokenPriceMap: Record<string, number>) =>
