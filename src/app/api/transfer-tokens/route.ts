@@ -45,6 +45,8 @@ export async function POST(req: Request) {
       publicClient.getBalance({ address: address as `0x${string}` }),
     ]);
 
+    console.log(vethBalance, vusdcBalance, sethBalance);
+
     if (vethBalance > BigInt(0) || vusdcBalance > BigInt(0)) {
       return NextResponse.json(
         { error: "Already has tokens" },
@@ -83,7 +85,7 @@ export async function POST(req: Request) {
       args: [address, BigInt(vusdcAmount)],
     });
 
-    if (sethBalance < BigInt(0.02) * BigInt(10 ** 18)) {
+    if (sethBalance < BigInt(0.02 * 10 ** 18)) {
       const sethAmount = decimalToTokenAmount(SETH_TRANSFER_AMOUNT, 18);
       await walletClient.sendTransaction({
         to: address,
