@@ -1,12 +1,12 @@
 "use client";
 
 import { useAccount } from "wagmi";
-import SelectPositionHeader from "../_components/positions/select-position-header";
-import Page from "../_components/common/page";
-import { usePositionPeripheryContract } from "../_hooks/usePositionPeripheryContract";
+import SelectPositionHeader from "../../_components/manage-positions/select-position-header";
+import Page from "../../_components/common/page";
+import { usePositionPeripheryContract } from "../../_hooks/usePositionPeripheryContract";
 import useGlobalStore from "@/stores/global/global-store";
 import { useMemo } from "react";
-import PositionCard from "../_components/positions/position-card";
+import PositionCard from "../../_components/manage-positions/position-card";
 import { Token } from "@/constants/token";
 import { Loader2 } from "lucide-react";
 
@@ -27,7 +27,7 @@ const Positions = ({}: PositionsProps) => {
     if (!positions) {
       return [];
     }
-    return positions.filter((p) => p.type === managePosition);
+    return positions.filter((p) => p.type === managePosition).reverse();
   }, [positions, managePosition]);
 
   return (
@@ -41,7 +41,7 @@ const Positions = ({}: PositionsProps) => {
               <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
             </div>
           ) : data.length === 0 ? (
-            <div className="flex flex-col items-center justify-center mt-8 p-8 border rounded-xl bg-gray-50">
+            <div className="flex flex-col items-center justify-center mt-4 p-8 border rounded-xl bg-gray-50">
               <p className="text-lg font-medium text-gray-900">
                 No positions found
               </p>

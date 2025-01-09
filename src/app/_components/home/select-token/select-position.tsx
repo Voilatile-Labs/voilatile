@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import SelectTokenModal from "./select-token-modal";
 import Image from "next/image";
 import { Token } from "@/constants/token";
@@ -11,6 +11,7 @@ import clsx from "clsx";
 import { decimalToTokenAmount } from "@/utils/currency";
 import { motion } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
+import useGlobalStore from "@/stores/global/global-store";
 
 interface SelectPositionProps {
   label?: string;
@@ -45,6 +46,8 @@ const SelectPosition = ({
 }: SelectPositionProps) => {
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
 
+  const { tokenPriceMap } = useGlobalStore();
+
   const handleAmountChange = (amount: string) => {
     if (!token) {
       toast({
@@ -63,6 +66,14 @@ const SelectPosition = ({
       onAmountChange?.(amount, rawAmount);
     }
   };
+
+  const tokenAmountUsd = useMemo(() => {
+    if (!token || !amount.amount) {
+      return 0;
+    }
+
+    return tokenPriceMap[token.searchId] * parseFloat(amount.amount);
+  }, [token, amount, tokenPriceMap]);
 
   return (
     <div className="max-w-lg w-full">
@@ -113,7 +124,7 @@ const SelectPosition = ({
             {Intl.NumberFormat("en-US", {
               style: "currency",
               currency: "USD",
-            }).format(parseFloat(amount.amount || "0"))}
+            }).format(tokenAmountUsd)}
           </div>
         </div>
 

@@ -122,7 +122,7 @@ export const usePositionPeripheryContract = (
             address: contract as `0x${string}`,
             abi: VoilatilePeripheryABI,
             functionName: "fetchLPPosition",
-            args: [i],
+            args: [address, i],
           })
         );
 
@@ -132,7 +132,7 @@ export const usePositionPeripheryContract = (
             address: contract as `0x${string}`,
             abi: VoilatilePeripheryABI,
             functionName: "fetchSSPosition",
-            args: [i],
+            args: [address, i],
           })
         );
 

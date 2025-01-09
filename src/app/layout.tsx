@@ -6,6 +6,8 @@ import { Inter } from "next/font/google";
 import WalletProvider from "./_containers/wallet-provider";
 import { Toaster } from "@/components/ui/toaster";
 import InitialStateProvider from "./_containers/initial-state";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { TokenPriceProvider } from "./_containers/token-price-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,9 +27,9 @@ const Layout = ({ children }: LayoutProps) => {
       <body className={`${inter.className} antialiased`}>
         <WalletProvider>
           <InitialStateProvider>
-            {/* <TokenPriceProvider> */}
-            {children}
-            {/* </TokenPriceProvider> */}
+            <TooltipProvider>
+              <TokenPriceProvider>{children}</TokenPriceProvider>
+            </TooltipProvider>
           </InitialStateProvider>
           <Toaster />
         </WalletProvider>

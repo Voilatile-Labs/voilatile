@@ -11,18 +11,17 @@ import { Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Sheet,
   SheetContent,
   SheetTitle,
   SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const abril = Abril_Fatface({
   weight: "400",
@@ -32,10 +31,11 @@ const abril = Abril_Fatface({
 const Links = [
   {
     label: "Positions",
+    href: "positions",
     item: [
       {
         label: "Manage",
-        href: "/positions",
+        href: "/positions/manage",
       },
       {
         label: "Create",
@@ -72,38 +72,48 @@ export const Header = () => {
 
         <ul className="items-center gap-4 ml-9 hidden md:flex">
           {Links.map((link) =>
-            link.href ? (
-              <Link
-                key={link.label}
-                href={link.href}
-                className={clsx(
-                  "text-gray-400 hover:text-gray-700",
-                  pathname === link.href && "text-gray-700 font-medium"
-                )}
-              >
-                {link.label}
-              </Link>
-            ) : (
-              <DropdownMenu key={link.label}>
-                <DropdownMenuTrigger className="text-gray-400 hover:text-gray-700">
-                  {link.label}
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {link.item?.map((item) => (
-                    <DropdownMenuItem key={item.label}>
+            link.item && link.item.length > 0 && link.href ? (
+              <Tooltip key={link.label}>
+                <TooltipTrigger asChild>
+                  <div
+                    onDoubleClick={() =>
+                      (window.location.href = "/positions/manage")
+                    }
+                    className={
+                      "text-gray-400 hover:text-gray-700 cursor-pointer select-none"
+                    }
+                  >
+                    {link.label}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="p-1 sm:p-1 shadow-none sm:shadow-none">
+                  <div className="flex flex-col gap-1 min-w-28">
+                    {link.item?.map((item) => (
                       <Link
+                        key={item.label}
                         href={item.href}
                         className={clsx(
-                          "w-full text-gray-400 hover:text-gray-700",
+                          "text-gray-400 hover:text-gray-700 hover:bg-gray-50 px-2 py-2 rounded",
                           pathname === item.href && "text-gray-700 font-medium"
                         )}
                       >
                         {item.label}
                       </Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Link
+                key={link.label}
+                href={link.href}
+                className={clsx(
+                  "text-gray-400 hover:text-gray-700 select-none",
+                  pathname === link.href && "text-gray-700 font-medium"
+                )}
+              >
+                {link.label}
+              </Link>
             )
           )}
         </ul>
@@ -141,19 +151,7 @@ export const Header = () => {
 
             <nav className="flex flex-col gap-2 pt-4">
               {Links.map((link) =>
-                link.href ? (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className={clsx(
-                      "flex items-center gap-2 text-gray-400 hover:text-gray-700 text-base py-2 px-4 rounded-lg transition-colors",
-                      pathname === link.href &&
-                        "text-gray-700 font-medium bg-gray-50"
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                ) : (
+                link.item && link.item.length > 0 && link.href ? (
                   <div key={link.label} className="flex flex-col">
                     <span className="text-gray-500 text-base font-medium px-4 py-1">
                       {link.label}
@@ -174,6 +172,18 @@ export const Header = () => {
                       ))}
                     </div>
                   </div>
+                ) : (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    className={clsx(
+                      "flex items-center gap-2 text-gray-400 hover:text-gray-700 text-base py-2 px-4 rounded-lg transition-colors",
+                      pathname === link.href &&
+                        "text-gray-700 font-medium bg-gray-50"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
                 )
               )}
             </nav>
