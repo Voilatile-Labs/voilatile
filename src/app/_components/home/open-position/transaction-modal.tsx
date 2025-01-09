@@ -58,8 +58,10 @@ const TransactionModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] rounded-2xl sm:rounded-2xl p-4">
         <DialogHeader>
-          <DialogTitle className="text-left">{data?.title}</DialogTitle>
-          <DialogDescription className="text-left">
+          <DialogTitle className="text-left text-gray-900">
+            {data?.title}
+          </DialogTitle>
+          <DialogDescription className="text-left text-gray-500">
             {data?.description}
           </DialogDescription>
         </DialogHeader>

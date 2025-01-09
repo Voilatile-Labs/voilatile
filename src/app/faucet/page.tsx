@@ -45,7 +45,9 @@ const Faucet = () => {
         <div className="max-w-lg w-full">
           <div className="rounded-2xl bg-white shadow-sm p-4 max-w-lg w-full border flex flex-col gap-4">
             <div className="flex items-center justify-center gap-4 mb-4 relative">
-              <h2 className="text-lg font-semibold">Testnet Faucet</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Testnet Faucet
+              </h2>
             </div>
 
             <p className="text-sm text-gray-500 text-center">
@@ -58,7 +60,7 @@ const Faucet = () => {
             </p>
 
             <div className="flex flex-col gap-4 mt-4">
-              <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
+              <div className="flex items-center gap-3 bg-primary/5 rounded-xl p-4">
                 <Image
                   src={defaultLongToken.image}
                   alt={defaultLongToken.name}
@@ -74,7 +76,7 @@ const Faucet = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
+              <div className="flex items-center gap-3 bg-primary/5 rounded-xl p-4">
                 <Image
                   src={defaultLongToken.image}
                   alt={defaultLongToken.name}
@@ -92,7 +94,7 @@ const Faucet = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-4">
+              <div className="flex items-center gap-3 bg-primary/5 rounded-xl p-4">
                 <Image
                   src={defaultShortToken.image}
                   alt={defaultShortToken.name}

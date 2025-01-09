@@ -286,8 +286,10 @@ const SelectStrikePriceRange = () => {
                 const utilization = payload?.payload?.utilization || 0;
                 return [
                   <>
-                    <div>Tick Index: {formatNumberWithDecimals(tick)}</div>
-                    <div>
+                    <div className="text-gray-500">
+                      Tick Index: {formatNumberWithDecimals(tick)}
+                    </div>
+                    <div className="text-gray-500">
                       Utilization: {formatNumberWithDecimals(utilization)}
                     </div>
                   </>,
@@ -314,7 +316,7 @@ const SelectStrikePriceRange = () => {
       </div>
 
       <div className="border rounded-2xl p-1 flex gap-3 items-center">
-        <div className="flex justify-center text-lg font-medium border rounded-xl p-2 w-24 bg-gray-50">
+        <div className="flex justify-center text-lg font-medium border rounded-xl p-2 w-24 bg-primary/10">
           <Input
             value={percentageStartStrikePrice}
             onFocus={(e) => e.target.select()}
@@ -327,7 +329,7 @@ const SelectStrikePriceRange = () => {
                 setPercentageStartStrikePrice(e.target.value);
               }
             }}
-            className="text-center border-0 p-0 bg-transparent"
+            className="text-center border-0 p-0 bg-transparent text-gray-500"
             placeholder="0%"
             style={{ fontSize: "1.25rem" }}
           />
@@ -348,7 +350,7 @@ const SelectStrikePriceRange = () => {
           />
         </div>
 
-        <div className="flex justify-center text-lg font-medium border rounded-xl p-2 w-24 bg-gray-50">
+        <div className="flex justify-center text-lg font-medium border rounded-xl p-2 w-24 bg-primary/10">
           <Input
             value={percentageEndStrikePrice}
             onFocus={(e) => e.target.select()}
@@ -361,7 +363,7 @@ const SelectStrikePriceRange = () => {
                 setPercentageEndStrikePrice(e.target.value);
               }
             }}
-            className="text-center border-0 p-0 bg-transparent"
+            className="text-center border-0 p-0 bg-transparent text-gray-500"
             placeholder="0%"
             style={{ fontSize: "1.25rem" }}
           />

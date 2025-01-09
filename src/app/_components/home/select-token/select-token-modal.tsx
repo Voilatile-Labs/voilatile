@@ -52,7 +52,7 @@ const SelectTokenModal = ({
           )}
         >
           <DialogHeader>
-            <DialogTitle className="text-base font-normal px-4">
+            <DialogTitle className="text-base font-normal px-4 text-gray-900">
               Select a token
             </DialogTitle>
           </DialogHeader>
@@ -88,7 +88,9 @@ const SelectTokenModal = ({
                     className="rounded-full"
                   />
                   <div>
-                    <div className="font-medium">{token.name}</div>
+                    <div className="font-medium text-gray-900">
+                      {token.name}
+                    </div>
                     <div className="text-sm text-gray-500">{token.symbol}</div>
                   </div>
                 </div>

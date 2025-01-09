@@ -22,7 +22,7 @@ const SelectTokenDropdown = ({
     <div className="w-full">
       <Button
         variant="outline"
-        className="p-1 pr-2 rounded-full hover:bg-gray-100 w-full"
+        className="p-1 pr-2 rounded-full hover:bg-primary/10 w-full"
         onClick={() => setIsTokenModalOpen(true)}
       >
         {token ? (
@@ -35,14 +35,20 @@ const SelectTokenDropdown = ({
                 height={28}
                 className="rounded-full"
               />
-              <span className="font-medium">{token.symbol}</span>
+              <span className="font-medium text-gray-900">{token.symbol}</span>
             </div>
-            <ChevronDown className="h-12 w-12 shrink-0" strokeWidth={2} />
+            <ChevronDown
+              className="h-12 w-12 shrink-0 text-gray-900"
+              strokeWidth={2}
+            />
           </div>
         ) : (
           <div className="flex items-center justify-between px-2 w-full">
-            <span className="font-medium">Select Token</span>
-            <ChevronDown className="h-12 w-12 shrink-0" strokeWidth={2} />
+            <span className="font-medium text-gray-900">Select Token</span>
+            <ChevronDown
+              className="h-12 w-12 shrink-0 text-gray-900"
+              strokeWidth={2}
+            />
           </div>
         )}
       </Button>

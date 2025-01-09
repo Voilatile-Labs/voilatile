@@ -79,13 +79,13 @@ const SelectPosition = ({
     <div className="max-w-lg w-full">
       <div
         className={clsx(
-          "flex justify-between items-center border rounded-2xl p-4",
-          readOnly ? "bg-gray-50" : ""
+          "flex justify-between items-center border rounded-2xl p-4 bg-[#F7F2FF]",
+          readOnly ? "bg-[#e2d1fc]/70" : ""
         )}
       >
         <div className="flex-1">
           {label && (
-            <h3 className="text-sm text-gray-500 mb-3 font-medium">{label}</h3>
+            <h3 className="text-sm mb-3 font-medium text-gray-900">{label}</h3>
           )}
           {isLoading ? (
             <motion.div
@@ -100,7 +100,7 @@ const SelectPosition = ({
               <Input
                 placeholder="0"
                 className={clsx(
-                  "text-4xl p-0 font-medium border-0 bg-transparent placeholder:text-gray-300",
+                  "text-4xl p-0 font-medium border-0 bg-transparent text-gray-900",
                   "animate-pulse opacity-50"
                 )}
                 style={{ fontSize: "2.25rem" }}
@@ -112,7 +112,7 @@ const SelectPosition = ({
           ) : (
             <Input
               placeholder="0"
-              className="text-4xl p-0 font-medium border-0 bg-transparent placeholder:text-gray-300"
+              className="text-4xl p-0 font-medium border-0 bg-transparent text-gray-900"
               style={{ fontSize: "2.25rem" }}
               value={amount.amount}
               onChange={(e) => handleAmountChange(e.target.value)}
@@ -130,7 +130,7 @@ const SelectPosition = ({
 
         <Button
           variant="outline"
-          className="p-1 pr-2 rounded-full hover:bg-gray-100"
+          className="p-1 pr-2 rounded-full hover:bg-primary/10"
           onClick={() => {
             if (allowTokenChange) {
               setIsTokenModalOpen(true);
@@ -146,14 +146,16 @@ const SelectPosition = ({
                 height={28}
                 className="rounded-full"
               />
-              <span className="font-medium mr-2">{token.symbol}</span>
+              <span className="font-medium mr-2 text-gray-900">
+                {token.symbol}
+              </span>
               {allowTokenChange && (
                 <ChevronDown className="h-12 w-12 shrink-0" strokeWidth={2} />
               )}
             </div>
           ) : (
             <div className="flex items-center gap-2 px-2">
-              <span className="font-medium">Select Token</span>
+              <span className="font-medium text-gray-900">Select Token</span>
               {allowTokenChange && (
                 <ChevronDown className="h-12 w-12 shrink-0" strokeWidth={2} />
               )}

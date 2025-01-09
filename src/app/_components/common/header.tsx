@@ -63,7 +63,7 @@ export const Header = () => {
           <h1
             className={clsx(
               abril.className,
-              "text-3xl font-semibold italic leading-6 text-[#7a0133]"
+              "text-3xl font-semibold italic leading-6 text-gray-900"
             )}
           >
             Voilatile
@@ -79,9 +79,11 @@ export const Header = () => {
                     onDoubleClick={() =>
                       (window.location.href = "/positions/manage")
                     }
-                    className={
-                      "text-gray-400 hover:text-gray-700 cursor-pointer select-none"
-                    }
+                    className={clsx(
+                      "text-gray-500 hover:text-gray-900 select-none",
+                      pathname.includes(link.href) &&
+                        "text-gray-900 font-medium"
+                    )}
                   >
                     {link.label}
                   </div>
@@ -93,8 +95,8 @@ export const Header = () => {
                         key={item.label}
                         href={item.href}
                         className={clsx(
-                          "text-gray-400 hover:text-gray-700 hover:bg-gray-50 px-2 py-2 rounded",
-                          pathname === item.href && "text-gray-700 font-medium"
+                          "text-gray-500 hover:text-gray-900 hover:bg-primary/5 px-2 py-2 rounded",
+                          pathname === item.href && "text-gray-900 font-medium"
                         )}
                       >
                         {item.label}
@@ -108,8 +110,8 @@ export const Header = () => {
                 key={link.label}
                 href={link.href}
                 className={clsx(
-                  "text-gray-400 hover:text-gray-700 select-none",
-                  pathname === link.href && "text-gray-700 font-medium"
+                  "text-gray-500 hover:text-gray-900 select-none",
+                  pathname === link.href && "text-gray-900 font-medium"
                 )}
               >
                 {link.label}
@@ -153,7 +155,7 @@ export const Header = () => {
               {Links.map((link) =>
                 link.item && link.item.length > 0 && link.href ? (
                   <div key={link.label} className="flex flex-col">
-                    <span className="text-gray-500 text-base font-medium px-4 py-1">
+                    <span className="text-gray-600 text-base font-medium px-4 py-1">
                       {link.label}
                     </span>
                     <div className="flex flex-col mt-1">
@@ -162,9 +164,9 @@ export const Header = () => {
                           key={item.label}
                           href={item.href}
                           className={clsx(
-                            "flex items-center gap-2 text-gray-400 hover:text-gray-700 text-base py-2 px-6 rounded-lg transition-colors",
+                            "flex items-center gap-2 text-gray-500 hover:text-gray-900 text-base py-2 px-6 rounded-lg transition-colors",
                             pathname === item.href &&
-                              "text-gray-700 font-medium bg-gray-50"
+                              "text-gray-900 font-medium bg-primary/10"
                           )}
                         >
                           {item.label}
@@ -177,9 +179,9 @@ export const Header = () => {
                     key={link.label}
                     href={link.href}
                     className={clsx(
-                      "flex items-center gap-2 text-gray-400 hover:text-gray-700 text-base py-2 px-4 rounded-lg transition-colors",
+                      "flex items-center gap-2 text-gray-500 hover:text-gray-900 text-base py-2 px-4 rounded-lg transition-colors",
                       pathname === link.href &&
-                        "text-gray-700 font-medium bg-gray-50"
+                        "text-gray-900 font-medium bg-primary/10"
                     )}
                   >
                     {link.label}

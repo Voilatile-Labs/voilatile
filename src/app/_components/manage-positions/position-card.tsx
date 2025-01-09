@@ -107,7 +107,7 @@ const PositionCard = ({
   return (
     <div
       className={clsx(
-        "border rounded-xl shadow-sm hover:shadow transition-shadow p-4",
+        "border rounded-xl shadow-xs hover:shadow transition-shadow p-4 bg-[#F7F2FF]",
         position.expired && "border-red-200 border-2"
       )}
     >
@@ -139,7 +139,7 @@ const PositionCard = ({
 
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="p-2 hover:bg-gray-50 rounded-full transition-colors"
+          className="p-2 hover:bg-primary/5 rounded-full transition-colors"
         >
           {isExpanded ? (
             <ChevronUp className="h-5 w-5 text-gray-500" />
@@ -150,7 +150,7 @@ const PositionCard = ({
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-x-2">
-        <div className="text-center bg-gray-50 rounded-xl py-3">
+        <div className="text-center bg-primary/5 rounded-xl py-3">
           <p className="text-xs text-gray-500">Amount</p>
           <p className="font-medium text-gray-900">
             {`${formatNumberWithDecimals(
@@ -159,7 +159,7 @@ const PositionCard = ({
             )} ${longToken.symbol}`}
           </p>
         </div>
-        <div className="text-center bg-gray-50 rounded-xl py-3">
+        <div className="text-center bg-primary/5 rounded-xl py-3">
           <p className="text-xs text-gray-500">Fee Rate</p>
           <p className="font-medium text-gray-900">
             {formatePercentage(selectedFeeTier.fee / 10000)}
@@ -201,7 +201,7 @@ const PositionCard = ({
           )}
 
           {position.endTimestamp && (
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center ">
               <span className="text-xs text-gray-500">End Block Number</span>
               <span className="text-sm font-medium text-gray-900">
                 {format(fromUnixTime(position.endTimestamp), "PPpp")}

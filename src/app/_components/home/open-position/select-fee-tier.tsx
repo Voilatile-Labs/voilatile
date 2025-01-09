@@ -27,7 +27,7 @@ const SelectFeeTier = ({ fee, onFeeSelect }: SelectFeeTierProps) => {
       <div className="border rounded-2xl p-3">
         <div className="flex justify-between items-center">
           <div>
-            <div className="text-sm font-medium">
+            <div className="text-sm font-medium text-gray-900">
               {formatePercentage(selectedFeeTier.fee / 10000)} funding fee
             </div>
             <div className="text-xs text-gray-500">
@@ -61,8 +61,10 @@ const SelectFeeTier = ({ fee, onFeeSelect }: SelectFeeTierProps) => {
                 }
                 onFeeSelect(tier.fee);
               }}
-              className={`relative flex justify-between items-center p-3 border rounded-2xl hover:bg-gray-50 cursor-pointer ${
-                tier.disabled ? "opacity-60" : "bg-gray-50"
+              className={`relative flex justify-between items-center p-3 border rounded-2xl text-gray-900 hover:text-gray-700 cursor-pointer ${
+                tier.disabled
+                  ? "text-gray-400 hover:text-gray-400 opacity-50"
+                  : ""
               }`}
             >
               {selectedFeeTier.fee === tier.fee && (

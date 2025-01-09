@@ -202,7 +202,7 @@ const SelectStrikePrice = () => {
       <h3 className="text-xs font-medium mb-2">Select Strike Price</h3>
 
       <div className="border rounded-2xl p-1 flex gap-3 items-center">
-        <div className="flex justify-center text-lg font-medium border rounded-xl p-2 w-24 bg-gray-50">
+        <div className="flex justify-center text-lg font-medium border rounded-xl p-2 w-24 bg-primary/10">
           <Input
             value={percentageStrikePrice}
             onFocus={(e) => e.target.select()}
@@ -215,7 +215,7 @@ const SelectStrikePrice = () => {
                 setPercentageStrikePrice(e.target.value);
               }
             }}
-            className="text-center border-0 p-0 bg-transparent"
+            className="text-center border-0 p-0 bg-transparent text-gray-500"
             placeholder="0%"
             style={{ fontSize: "1.25rem" }}
           />
@@ -274,8 +274,12 @@ const SelectStrikePrice = () => {
                     ((longToken?.decimals || 0) - (shortToken?.decimals || 0));
                 return [
                   <>
-                    <div>PnL: {formatePercentage(value)}</div>
-                    <div>Short Price: {formatNumberWithDecimals(price)}x</div>
+                    <div className="text-gray-500">
+                      PnL: {formatePercentage(value)}
+                    </div>
+                    <div className="text-gray-500">
+                      Short Price: {formatNumberWithDecimals(price)}x
+                    </div>
                   </>,
                 ];
               }}
