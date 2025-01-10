@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import { clsx } from "clsx";
-import { Abril_Fatface } from "next/font/google";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAccountModal, useConnectModal } from "@rainbow-me/rainbowkit";
@@ -22,11 +21,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-const abril = Abril_Fatface({
-  weight: "400",
-  subsets: ["latin"],
-});
 
 const Links = [
   {
@@ -60,27 +54,27 @@ export const Header = () => {
     <nav className="flex items-center justify-between px-4 sm:px-6 py-4">
       <div className="flex items-center">
         <Link href="/">
-          <h1
-            className={clsx(
-              abril.className,
-              "text-3xl font-semibold italic leading-6 text-gray-900"
-            )}
-          >
-            Voilatile
-          </h1>
+          <div className="relative items-center w-32 h-8 flex justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/images/logo.gif"
+              alt="logo"
+              className="absolute mt-4"
+            />
+          </div>
         </Link>
 
         <ul className="items-center gap-4 ml-9 hidden md:flex">
           {Links.map((link) =>
             link.item && link.item.length > 0 && link.href ? (
-              <Tooltip key={link.label}>
+              <Tooltip key={link.label} delayDuration={0}>
                 <TooltipTrigger asChild>
                   <div
                     onDoubleClick={() =>
                       (window.location.href = "/positions/manage")
                     }
                     className={clsx(
-                      "text-gray-500 hover:text-gray-900 select-none",
+                      "text-gray-500 hover:text-gray-900 select-none cursor-pointer",
                       pathname.includes(link.href) &&
                         "text-gray-900 font-medium"
                     )}
