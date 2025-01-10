@@ -330,7 +330,7 @@ const SelectStrikePriceRange = () => {
       </div>
 
       <div className="border rounded-2xl p-1 flex gap-3 items-center">
-        <div className="flex justify-center text-lg font-medium rounded-xl p-2 w-24 bg-white border-2 border-[#9747ff]">
+        <div className="flex justify-center text-lg font-medium rounded-xl p-2 w-24 bg-white border border-[#9747ff]">
           <Input
             value={percentageStartStrikePrice}
             onFocus={(e) => e.target.select()}
@@ -365,7 +365,7 @@ const SelectStrikePriceRange = () => {
           />
         </div>
 
-        <div className="flex justify-center text-lg font-medium rounded-xl p-2 w-24 bg-white border-2 border-[#9747ff]">
+        <div className="flex justify-center text-lg font-medium rounded-xl p-2 w-24 bg-white border border-[#9747ff]">
           <Input
             value={percentageEndStrikePrice}
             onFocus={(e) => e.target.select()}

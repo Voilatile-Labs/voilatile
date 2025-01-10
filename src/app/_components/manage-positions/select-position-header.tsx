@@ -14,7 +14,7 @@ const SelectPositionHeader = () => {
         onValueChange={(value) => setManagePosition(value as Position)}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-white border-2 border-[#9747ff]">
+        <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-white border border-[#9747ff]">
           <TabsTrigger
             value={Position.Long}
             className={cn(

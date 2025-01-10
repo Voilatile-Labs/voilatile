@@ -22,7 +22,7 @@ const CreatePosition = ({}: CreatePositionProps) => {
             onValueChange={(value) => setCreatePosition(value as Position)}
             className="w-full mb-4"
           >
-            <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-white border-2 border-[#9747ff]">
+            <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-white border border-[#9747ff]">
               <TabsTrigger
                 value={Position.Liquidity}
                 className={cn(

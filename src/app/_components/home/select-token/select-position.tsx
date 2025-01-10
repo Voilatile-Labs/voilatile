@@ -79,7 +79,7 @@ const SelectPosition = ({
     <div className="max-w-lg w-full">
       <div
         className={cn(
-          "flex justify-between items-center border-2 border-[#9747ff] rounded-2xl p-4 bg-white"
+          "flex justify-between items-center border border-[#9747ff] rounded-2xl p-4 bg-white"
         )}
       >
         <div className="flex-1">

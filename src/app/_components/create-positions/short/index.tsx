@@ -236,7 +236,7 @@ const OpenShortPosition = () => {
                 setOpenTransactionModal(true);
               }
             }}
-            className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] border-2 border-[#e2d1fc] text-gray-900"
+            className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] border border-[#e2d1fc] text-gray-900"
           >
             Open
           </Button>
@@ -250,7 +250,7 @@ const OpenShortPosition = () => {
                 setOpenTransactionModal(true);
               }
             }}
-            className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] border-2 border-[#e2d1fc] text-gray-900"
+            className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] border border-[#e2d1fc] text-gray-900"
           >
             Approve
           </Button>
@@ -258,7 +258,7 @@ const OpenShortPosition = () => {
       ) : (
         <Button
           onClick={openConnectModal}
-          className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] border-2 border-[#e2d1fc] text-gray-900"
+          className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] border border-[#e2d1fc] text-gray-900"
         >
           Connect Wallet
         </Button>

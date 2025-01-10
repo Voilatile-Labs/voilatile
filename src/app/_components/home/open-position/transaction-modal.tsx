@@ -73,7 +73,7 @@ const TransactionModal = ({
             className="w-full rounded-xl"
           >
             {isReceiptLoading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              <div className="h-4 w-4 animate-spin rounded-full border border-current border-t-transparent" />
             ) : (
               "Confirm"
             )}

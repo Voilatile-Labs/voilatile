@@ -107,7 +107,7 @@ const PositionCard = ({
   return (
     <div
       className={cn(
-        "rounded-xl shadow-xs hover:shadow transition-shadow p-4 bg-white border-2 border-[#9747ff]"
+        "rounded-xl shadow-xs hover:shadow transition-shadow p-4 bg-white border border-[#9747ff]"
       )}
     >
       <div className="flex justify-between items-center">
@@ -118,14 +118,14 @@ const PositionCard = ({
               alt={longToken.symbol}
               width={32}
               height={32}
-              className="rounded-full border-2 border-white"
+              className="rounded-full border border-white"
             />
             <Image
               src={shortToken.image}
               alt={shortToken.symbol}
               width={32}
               height={32}
-              className="rounded-full border-2 border-white"
+              className="rounded-full border border-white"
             />
           </div>
 
