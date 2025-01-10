@@ -70,7 +70,7 @@ const TransactionModal = ({
           <Button
             onClick={handleConfirm}
             disabled={isReceiptLoading}
-            className="w-full rounded-xl"
+            className="w-full rounded-xl bg-[#efe3ff] text-gray-900 hover:bg-[#e2d1fc]"
           >
             {isReceiptLoading ? (
               <div className="h-4 w-4 animate-spin rounded-full border border-current border-t-transparent" />
