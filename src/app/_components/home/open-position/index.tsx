@@ -239,7 +239,7 @@ const OpenPosition = () => {
                 setOpenTransactionModal(true);
               }
             }}
-            className="rounded-2xl w-full mt-4 h-12 text-base"
+            className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] hover:bg-[#e2d1fc] text-gray-900"
           >
             Open
           </Button>
@@ -253,7 +253,7 @@ const OpenPosition = () => {
                 setOpenTransactionModal(true);
               }
             }}
-            className="rounded-2xl w-full mt-4 h-12 text-base"
+            className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] hover:bg-[#e2d1fc] text-gray-900"
           >
             Approve
           </Button>
@@ -261,7 +261,7 @@ const OpenPosition = () => {
       ) : (
         <Button
           onClick={openConnectModal}
-          className="rounded-2xl w-full mt-4 h-12 text-base"
+          className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] hover:bg-[#e2d1fc] text-gray-900"
         >
           Connect
         </Button>

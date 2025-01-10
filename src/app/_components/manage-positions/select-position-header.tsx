@@ -1,6 +1,7 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import useGlobalStore, { Position } from "@/stores/global/global-store";
 
 const SelectPositionHeader = () => {
@@ -13,16 +14,34 @@ const SelectPositionHeader = () => {
         onValueChange={(value) => setManagePosition(value as Position)}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-3 rounded-2xl">
-          <TabsTrigger value={Position.Long} className="text-xs rounded-xl">
+        <TabsList className="grid w-full grid-cols-3 rounded-2xl bg-white border-2 border-[#9747ff]">
+          <TabsTrigger
+            value={Position.Long}
+            className={cn(
+              "text-xs rounded-xl",
+              managePosition === Position.Long &&
+                "data-[state=active]:bg-[#efe3ff]"
+            )}
+          >
             Long
           </TabsTrigger>
-          <TabsTrigger value={Position.Short} className="text-xs rounded-xl">
+          <TabsTrigger
+            value={Position.Short}
+            className={cn(
+              "text-xs rounded-xl",
+              managePosition === Position.Short &&
+                "data-[state=active]:bg-[#efe3ff]"
+            )}
+          >
             Short
           </TabsTrigger>
           <TabsTrigger
             value={Position.Liquidity}
-            className="text-xs rounded-xl"
+            className={cn(
+              "text-xs rounded-xl",
+              managePosition === Position.Liquidity &&
+                "data-[state=active]:bg-[#efe3ff]"
+            )}
           >
             Liquidity
           </TabsTrigger>

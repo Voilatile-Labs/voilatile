@@ -119,7 +119,7 @@ const SelectToken = () => {
 
       <Button
         onClick={() => setStep(CreateLongPosition.OpenPosition)}
-        className="rounded-2xl w-full mt-4 h-12 text-base"
+        className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] text-gray-900 hover:bg-[#e2d1fc]"
       >
         Get trading
       </Button>

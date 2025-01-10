@@ -22,7 +22,7 @@ const SelectTokenDropdown = ({
     <div className="w-full">
       <Button
         variant="outline"
-        className="p-1 pr-2 rounded-full hover:bg-primary/10 w-full"
+        className="p-1 pr-2 rounded-full bg-[#efe3ff] hover:bg-[#e2d1fc] w-full"
         onClick={() => setIsTokenModalOpen(true)}
       >
         {token ? (

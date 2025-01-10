@@ -41,7 +41,7 @@ const Positions = ({}: PositionsProps) => {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : data.length === 0 ? (
-            <div className="flex flex-col items-center justify-center mt-4 p-8 border rounded-xl bg-primary/5">
+            <div className="flex flex-col items-center justify-center mt-4 p-8 border rounded-xl bg-[#efe3ff]">
               <p className="text-lg font-medium text-gray-900">
                 No positions found
               </p>

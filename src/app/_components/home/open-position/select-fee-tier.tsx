@@ -38,7 +38,7 @@ const SelectFeeTier = ({ fee, onFeeSelect }: SelectFeeTierProps) => {
             variant="secondary"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-1 text-xs"
+            className="flex items-center gap-1 text-xs bg-[#efe3ff] hover:bg-[#e2d1fc]"
           >
             {isExpanded ? "Less" : "More"}
             {isExpanded ? (

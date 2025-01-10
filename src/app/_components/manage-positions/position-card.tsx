@@ -15,7 +15,7 @@ import { data as FeeTiers } from "@/constants/fee";
 import { PositionData } from "@/app/_hooks/usePositionPeripheryContract";
 import { Position } from "@/stores/global/global-store";
 import { format, fromUnixTime } from "date-fns";
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 
 interface PositionCardProps {
   longToken: Token;
@@ -106,9 +106,8 @@ const PositionCard = ({
 
   return (
     <div
-      className={clsx(
-        "border rounded-xl shadow-xs hover:shadow transition-shadow p-4 bg-[#F7F2FF]",
-        position.expired && "border-red-200 border-2"
+      className={cn(
+        "rounded-xl shadow-xs hover:shadow transition-shadow p-4 bg-white border-2 border-[#9747ff]"
       )}
     >
       <div className="flex justify-between items-center">
@@ -150,7 +149,7 @@ const PositionCard = ({
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-x-2">
-        <div className="text-center bg-primary/5 rounded-xl py-3">
+        <div className="text-center bg-[#efe3ff] rounded-xl py-3">
           <p className="text-xs text-gray-500">Amount</p>
           <p className="font-medium text-gray-900">
             {`${formatNumberWithDecimals(
@@ -159,7 +158,7 @@ const PositionCard = ({
             )} ${longToken.symbol}`}
           </p>
         </div>
-        <div className="text-center bg-primary/5 rounded-xl py-3">
+        <div className="text-center bg-[#efe3ff] rounded-xl py-3">
           <p className="text-xs text-gray-500">Fee Rate</p>
           <p className="font-medium text-gray-900">
             {formatePercentage(selectedFeeTier.fee / 10000)}

@@ -43,7 +43,7 @@ const Faucet = () => {
     <Page>
       <div className="flex flex-col justify-center items-center p-4 py-8">
         <div className="max-w-lg w-full">
-          <div className="rounded-2xl bg-white shadow-sm p-4 max-w-lg w-full border flex flex-col gap-4">
+          <div className="rounded-2xl bg-white shadow-sm p-4 max-w-lg w-full border-2 border-[#9747ff] flex flex-col gap-4">
             <div className="flex items-center justify-center gap-4 mb-4 relative">
               <h2 className="text-lg font-semibold text-gray-900">
                 Testnet Faucet
@@ -60,7 +60,7 @@ const Faucet = () => {
             </p>
 
             <div className="flex flex-col gap-4 mt-4">
-              <div className="flex items-center gap-3 bg-primary/5 rounded-xl p-4">
+              <div className="flex items-center gap-3 bg-primary/5 rounded-xl p-4  border-2 border-[#9747ff]">
                 <Image
                   src={defaultLongToken.image}
                   alt={defaultLongToken.name}
@@ -76,7 +76,7 @@ const Faucet = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 bg-primary/5 rounded-xl p-4">
+              <div className="flex items-center gap-3 bg-primary/5 rounded-xl p-4 border-2 border-[#9747ff]">
                 <Image
                   src={defaultLongToken.image}
                   alt={defaultLongToken.name}
@@ -94,7 +94,7 @@ const Faucet = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 bg-primary/5 rounded-xl p-4">
+              <div className="flex items-center gap-3 bg-primary/5 rounded-xl p-4 border-2 border-[#9747ff]">
                 <Image
                   src={defaultShortToken.image}
                   alt={defaultShortToken.name}
@@ -117,7 +117,7 @@ const Faucet = () => {
           {address ? (
             <Button
               onClick={handleTokenFaucet}
-              className="rounded-2xl w-full mt-4 h-12 text-base"
+              className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] border-2 hover:bg-[#e2d1fc] text-gray-900"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -129,7 +129,7 @@ const Faucet = () => {
           ) : (
             <Button
               onClick={openConnectModal}
-              className="rounded-2xl w-full mt-4 h-12 text-base"
+              className="rounded-2xl w-full mt-4 h-12 text-base bg-[#efe3ff] border-2 hover:bg-[#e2d1fc] text-gray-900"
             >
               Connect
             </Button>

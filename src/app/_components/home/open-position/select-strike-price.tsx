@@ -192,7 +192,7 @@ const SelectStrikePrice = () => {
       <h3 className="text-xs font-medium mb-2">Select Strike Price</h3>
 
       <div className="border rounded-2xl p-1 flex gap-3 items-center">
-        <div className="flex justify-center text-lg font-medium border rounded-xl p-2 w-24 bg-primary/10">
+        <div className="flex justify-center text-lg font-medium rounded-xl p-2 w-24 bg-white border-2 border-[#9747ff]">
           <Input
             value={percentageStrikePrice}
             onFocus={(e) => e.target.select()}
@@ -219,6 +219,7 @@ const SelectStrikePrice = () => {
             step={TICK_SPACE}
             onValueChange={([value]) => handleTickChange(value)}
             className="w-full [&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+            rangeClassName="bg-[#9747ff]"
           />
         </div>
       </div>

@@ -48,7 +48,7 @@ const SelectTokenModal = ({
       {isOpen && (
         <DialogContent
           className={cn(
-            "w-[96%] sm:max-w-[400px] rounded-2xl sm:rounded-2xl p-0 py-4"
+            "w-[96%] sm:max-w-[400px] rounded-2xl sm:rounded-2xl p-0 py-4 bg-white"
           )}
         >
           <DialogHeader>
@@ -59,12 +59,12 @@ const SelectTokenModal = ({
 
           <div className="relative flex-1 w-full px-4">
             <div className="absolute inset-y-0 left-0 pl-7 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
+              <Search className="h-4 w-4" />
             </div>
             <Input
               type="text"
               placeholder="Search tokens"
-              className="pl-10 w-full rounded-full placeholder:text-gray-300"
+              className="pl-10 w-full rounded-full placeholder:text-gray-300 bg-white "
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -75,7 +75,7 @@ const SelectTokenModal = ({
               filteredTokens.map((token, index) => (
                 <div
                   key={"token:" + index}
-                  className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 cursor-pointer"
+                  className="flex items-center gap-3 py-3 px-4 hover:bg-[#efe3ff] cursor-pointer"
                   onClick={() => {
                     onSelectToken(token);
                   }}

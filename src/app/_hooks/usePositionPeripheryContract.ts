@@ -39,6 +39,8 @@ export const usePositionPeripheryContract = (
   const [positions, setPositions] = useState<PositionData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // address = "0x3fc1C02fe1dB725B92D728aF3Ad9C8269cb530D8";
+
   const { data: tokens } = useReadContracts({
     contracts: [
       {
@@ -102,8 +104,8 @@ export const usePositionPeripheryContract = (
       try {
         const [
           nextLongPositionId,
-          nextShortPositionId,
           nextLiquidityPositionId,
+          nextShortPositionId,
         ] = nextPositionIds.map((id) => Number(id?.result || 0));
 
         const longPositionContractOptions = Array.from(

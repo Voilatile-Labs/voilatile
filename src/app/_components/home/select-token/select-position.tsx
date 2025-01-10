@@ -7,11 +7,11 @@ import { useMemo, useState } from "react";
 import SelectTokenModal from "./select-token-modal";
 import Image from "next/image";
 import { Token } from "@/constants/token";
-import clsx from "clsx";
 import { decimalToTokenAmount } from "@/utils/currency";
 import { motion } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 import useGlobalStore from "@/stores/global/global-store";
+import { cn } from "@/lib/utils";
 
 interface SelectPositionProps {
   label?: string;
@@ -78,9 +78,8 @@ const SelectPosition = ({
   return (
     <div className="max-w-lg w-full">
       <div
-        className={clsx(
-          "flex justify-between items-center border rounded-2xl p-4 bg-[#F7F2FF]",
-          readOnly ? "bg-[#e2d1fc]/70" : ""
+        className={cn(
+          "flex justify-between items-center border-2 border-[#9747ff] rounded-2xl p-4 bg-white"
         )}
       >
         <div className="flex-1">
@@ -99,7 +98,7 @@ const SelectPosition = ({
             >
               <Input
                 placeholder="0"
-                className={clsx(
+                className={cn(
                   "text-4xl p-0 font-medium border-0 bg-transparent text-gray-900",
                   "animate-pulse opacity-50"
                 )}
@@ -130,7 +129,7 @@ const SelectPosition = ({
 
         <Button
           variant="outline"
-          className="p-1 pr-2 rounded-full hover:bg-primary/10"
+          className="p-1 pr-2 rounded-full bg-[#efe3ff] hover:bg-[#e2d1fc]"
           onClick={() => {
             if (allowTokenChange) {
               setIsTokenModalOpen(true);

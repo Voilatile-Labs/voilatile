@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useAccount } from "wagmi";
-import { clsx } from "clsx";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAccountModal, useConnectModal } from "@rainbow-me/rainbowkit";
@@ -21,6 +20,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const Links = [
   {
@@ -73,7 +73,7 @@ export const Header = () => {
                     onDoubleClick={() =>
                       (window.location.href = "/positions/manage")
                     }
-                    className={clsx(
+                    className={cn(
                       "text-gray-500 hover:text-gray-900 select-none cursor-pointer",
                       pathname.includes(link.href) &&
                         "text-gray-900 font-medium"
@@ -88,7 +88,7 @@ export const Header = () => {
                       <Link
                         key={item.label}
                         href={item.href}
-                        className={clsx(
+                        className={cn(
                           "text-gray-500 hover:text-gray-900 hover:bg-primary/5 px-2 py-2 rounded",
                           pathname === item.href && "text-gray-900 font-medium"
                         )}
@@ -103,7 +103,7 @@ export const Header = () => {
               <Link
                 key={link.label}
                 href={link.href}
-                className={clsx(
+                className={cn(
                   "text-gray-500 hover:text-gray-900 select-none",
                   pathname === link.href && "text-gray-900 font-medium"
                 )}
@@ -157,7 +157,7 @@ export const Header = () => {
                         <Link
                           key={item.label}
                           href={item.href}
-                          className={clsx(
+                          className={cn(
                             "flex items-center gap-2 text-gray-500 hover:text-gray-900 text-base py-2 px-6 rounded-lg transition-colors",
                             pathname === item.href &&
                               "text-gray-900 font-medium bg-primary/10"
@@ -172,7 +172,7 @@ export const Header = () => {
                   <Link
                     key={link.label}
                     href={link.href}
-                    className={clsx(
+                    className={cn(
                       "flex items-center gap-2 text-gray-500 hover:text-gray-900 text-base py-2 px-4 rounded-lg transition-colors",
                       pathname === link.href &&
                         "text-gray-900 font-medium bg-primary/10"
