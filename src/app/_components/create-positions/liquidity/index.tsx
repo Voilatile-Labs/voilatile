@@ -101,6 +101,17 @@ const OpenLiquidityPosition = () => {
     }
   }, [updateAllowance, refetchLongTokenAllowance, refetchShortTokenAllowance]);
 
+  const [n, m] = useMemo(() => {
+    if (!atm) {
+      return [0, 0];
+    }
+
+    return [
+      endTick - atm + 1 > 0 ? endTick - atm + 1 : 0,
+      atm - startTick > 0 ? atm - startTick : 0,
+    ];
+  }, [atm, startTick, endTick]);
+
   const createAllowanceTransaction = (token: Token | undefined) => {
     if (!longToken) {
       toast({
@@ -141,6 +152,10 @@ const OpenLiquidityPosition = () => {
   };
 
   const createPositionTransaction = () => {
+    if (!atm) {
+      return;
+    }
+
     if (!longToken || !shortToken || !startTick || !endTick) {
       toast({
         title: "Token Required",
@@ -165,13 +180,31 @@ const OpenLiquidityPosition = () => {
       return;
     }
 
+    const tickDistance = endTick - startTick;
+
+    let amount = 0;
+    if (n === 0) {
+      const lowerTicks = Array.from(
+        { length: endTick - startTick + 1 },
+        (_, i) => startTick + i
+      );
+
+      amount =
+        shortTokenAmount.rawAmount /
+        lowerTicks.reduce((acc, t) => acc + tickToPrice(t), 0);
+    } else if (m === 0) {
+      amount = longTokenAmount.rawAmount / tickDistance;
+    } else {
+      amount = longTokenAmount.rawAmount / n;
+    }
+
     return {
       contract: {
         address: process.env
           .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "rangeLP",
-        args: [longTokenAmount.rawAmount, startTick, endTick],
+        args: [Math.ceil(amount), startTick, endTick],
       },
       title: "Open Liquidity Position",
       description: "Are you sure you want to open this liquidity position?",
@@ -199,6 +232,7 @@ const OpenLiquidityPosition = () => {
             token={longToken}
             amount={longTokenAmount}
             allowTokenChange={false}
+            readOnly={n === 0}
             onAmountChange={async (amount, rawAmount) => {
               if (!shortToken) {
                 toast({
@@ -220,6 +254,11 @@ const OpenLiquidityPosition = () => {
               }
 
               try {
+                if (startTick >= atm) {
+                  setShortTokenAmount({ amount: "", rawAmount: 0 });
+                  return;
+                }
+
                 const upperTicks =
                   Math.floor((endTick - atm) / TICK_SPACE) + 1 > 0
                     ? Array.from(
@@ -237,10 +276,6 @@ const OpenLiquidityPosition = () => {
                         (_, i) => atm - (i + 1) * TICK_SPACE
                       )
                     : [];
-
-                if (upperTicks.length === 0) {
-                  throw new Error("Invalid Range");
-                }
 
                 const shortTokenRawAmount = Math.floor(
                   (rawAmount / upperTicks.length) *
@@ -270,6 +305,7 @@ const OpenLiquidityPosition = () => {
             token={shortToken}
             amount={shortTokenAmount}
             allowTokenChange={false}
+            readOnly={m === 0}
             onAmountChange={async (amount, rawAmount) => {
               if (!longToken) {
                 toast({
@@ -291,6 +327,11 @@ const OpenLiquidityPosition = () => {
               }
 
               try {
+                if (endTick <= atm) {
+                  setLongTokenAmount({ amount: "", rawAmount: 0 });
+                  return;
+                }
+
                 const upperTicks =
                   Math.floor((endTick - atm) / TICK_SPACE) + 1 > 0
                     ? Array.from(
@@ -308,10 +349,6 @@ const OpenLiquidityPosition = () => {
                         (_, i) => atm - (i + 1) * TICK_SPACE
                       )
                     : [];
-
-                if (lowerTicks.length === 0) {
-                  throw new Error("Invalid Range");
-                }
 
                 const longTokenRawAmount = Math.floor(
                   (rawAmount * upperTicks.length) /

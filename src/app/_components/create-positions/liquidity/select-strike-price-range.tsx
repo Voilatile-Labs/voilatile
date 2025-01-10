@@ -35,6 +35,7 @@ const SelectStrikePriceRange = () => {
     setShortTokenAmount,
     shortToken,
     longTokenAmount,
+    setLongTokenAmount,
   } = useLiquidityPositionStore();
 
   const { atm, getContractUtilization } = usePeripheryContract(
@@ -102,6 +103,19 @@ const SelectStrikePriceRange = () => {
 
     setStartTick(inputStartTick);
     setEndTick(inputEndTick);
+
+    const n = inputEndTick - atm + 1 > 0 ? inputEndTick - atm + 1 : 0;
+    const m = atm - inputStartTick > 0 ? atm - inputStartTick : 0;
+
+    if (n === 0) {
+      setLongTokenAmount({ amount: "", rawAmount: 0 });
+      return;
+    }
+
+    if (m === 0) {
+      setShortTokenAmount({ amount: "", rawAmount: 0 });
+      return;
+    }
 
     if (!shortToken || !longTokenAmount || !atm) {
       toast({
