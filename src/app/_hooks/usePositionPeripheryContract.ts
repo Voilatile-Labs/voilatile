@@ -39,7 +39,7 @@ export const usePositionPeripheryContract = (
   const [positions, setPositions] = useState<PositionData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // address = "0x3fc1C02fe1dB725B92D728aF3Ad9C8269cb530D8";
+  address = "0x3fc1C02fe1dB725B92D728aF3Ad9C8269cb530D8";
 
   const { data: tokens } = useReadContracts({
     contracts: [
@@ -147,6 +147,8 @@ export const usePositionPeripheryContract = (
           ],
         });
 
+        console.log(rawPositions);
+
         if (!rawPositions) {
           toast({
             title: "Error Fetching Positions",
@@ -216,17 +218,17 @@ export const usePositionPeripheryContract = (
               tickIndex: Number(rawPosition[0]),
               pTokenAmount: {
                 amount: tokenAmountToDecimal(
-                  Number(rawPosition[3] || 0),
+                  Number(rawPosition[1] || 0),
                   pToken.decimals
                 ).toString(),
-                rawAmount: Number(rawPosition[3] || 0),
+                rawAmount: Number(rawPosition[1] || 0),
               },
               qTokensAmount: {
                 amount: tokenAmountToDecimal(
-                  Number(rawPosition[4] || 0),
+                  Number(rawPosition[2] || 0),
                   qToken.decimals
                 ).toString(),
-                rawAmount: Number(rawPosition[4] || 0),
+                rawAmount: Number(rawPosition[2] || 0),
               },
             });
           } else {
@@ -236,17 +238,17 @@ export const usePositionPeripheryContract = (
               tickIndex: Number(rawPosition[0]),
               pTokenAmount: {
                 amount: tokenAmountToDecimal(
-                  Number(rawPosition[3] || 0),
+                  Number(rawPosition[1] || 0),
                   pToken.decimals
                 ).toString(),
-                rawAmount: Number(rawPosition[3] || 0),
+                rawAmount: Number(rawPosition[1] || 0),
               },
               qTokensAmount: {
                 amount: tokenAmountToDecimal(
-                  Number(rawPosition[4] || 0),
+                  Number(rawPosition[2] || 0),
                   qToken.decimals
                 ).toString(),
-                rawAmount: Number(rawPosition[4] || 0),
+                rawAmount: Number(rawPosition[2] || 0),
               },
             });
           }
