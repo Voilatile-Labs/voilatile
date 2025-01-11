@@ -329,7 +329,7 @@ const SelectStrikePriceRange = () => {
         </ResponsiveContainer>
       </div>
 
-      <div className="border rounded-2xl p-1 flex gap-3 items-center">
+      <div className="border rounded-2xl p-1 flex gap-3 items-center mt-2">
         <div className="flex justify-center text-lg font-medium rounded-xl p-2 w-24 bg-white border border-[#9747ff]">
           <Input
             value={percentageStartStrikePrice}

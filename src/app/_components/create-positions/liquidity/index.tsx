@@ -185,17 +185,18 @@ const OpenLiquidityPosition = () => {
     let amount = 0;
     if (n === 0) {
       const lowerTicks = Array.from(
-        { length: endTick - startTick + 1 },
-        (_, i) => startTick + i
+        { length: Math.floor((endTick - startTick) / TICK_SPACE) + 1 },
+        (_, i) => startTick + i * TICK_SPACE
       );
 
       amount =
         shortTokenAmount.rawAmount /
         lowerTicks.reduce((acc, t) => acc + tickToPrice(t), 0);
     } else if (m === 0) {
-      amount = longTokenAmount.rawAmount / tickDistance;
+      amount =
+        longTokenAmount.rawAmount / (Math.floor(tickDistance / TICK_SPACE) + 1);
     } else {
-      amount = longTokenAmount.rawAmount / n;
+      amount = longTokenAmount.rawAmount / Math.floor(n / TICK_SPACE);
     }
 
     return {
