@@ -38,13 +38,14 @@ const SelectStrikePrice = () => {
     setShortTokenAmount,
   } = useShortPositionStore();
 
-  const { atm, getCalculatedLongPrices } = usePeripheryContract(
+  const { atm, getCalculatedLongPrices, pToken, qToken } = usePeripheryContract(
     process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
   );
 
   const [chartData, setChartData] = useState<
     Array<{
       tick: number;
+      tickPrice: number;
       profit: number;
       price: number;
     }>
@@ -68,7 +69,7 @@ const SelectStrikePrice = () => {
 
   useEffect(() => {
     const fetchChartData = async () => {
-      if (!tick || !atm || !tickRangeData.length) {
+      if (!tick || !atm || !tickRangeData.length || !pToken || !qToken) {
         return;
       }
 
@@ -100,9 +101,12 @@ const SelectStrikePrice = () => {
         const xTickProfit =
           ((xTickShortPrice - atmShortPrice) / atmShortPrice) * 100;
 
+        const xTickPrice = atmTickPrice * tickToPrice(xTick - atm);
+
         return {
           tick: xTick,
-          price: xTickShortPrice,
+          tickPrice: xTickPrice * 10 ** (pToken.decimals - qToken.decimals),
+          price: xTickShortPrice * 10 ** (pToken.decimals - qToken.decimals),
           profit: xTickProfit,
         };
       });
@@ -183,9 +187,11 @@ const SelectStrikePrice = () => {
   };
 
   const handleChartClick = (data: CategoricalChartState) => {
-    if (data && data.activePayload && data.activePayload[0]) {
+    if (data && data.activePayload && data.activePayload[0] && atm) {
       const tick = data.activePayload[0].payload.tick;
-      setTick(tick);
+
+      setPercentageStrikePrice(formatePercentage(tickToProfit(tick, atm)));
+      handleTickChange(tick);
     }
   };
 
@@ -238,7 +244,7 @@ const SelectStrikePrice = () => {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
-            margin={{ bottom: 10 }}
+            margin={{ bottom: 20 }}
             onClick={handleChartClick}
           >
             <XAxis
@@ -247,10 +253,16 @@ const SelectStrikePrice = () => {
                 value: XAxisLabel,
                 position: "bottom",
                 fontSize: 12,
-                offset: -16,
+                offset: -4,
               }}
               domain={["auto", "auto"]}
-              tick={false}
+              tick={{ fontSize: 11 }}
+              tickFormatter={(tick) => {
+                const data = chartData.find((x) => x.tick === tick);
+                const tickPrice = data?.tickPrice || 0;
+
+                return formatNumberWithDecimals(tickPrice);
+              }}
             />
 
             <YAxis
@@ -269,14 +281,16 @@ const SelectStrikePrice = () => {
             <Tooltip
               contentStyle={{ fontSize: "12px", padding: "4px 8px" }}
               formatter={(value: number, name: string, payload: any) => {
-                const price =
-                  payload?.payload?.price *
-                  10 **
-                    ((longToken?.decimals || 0) - (shortToken?.decimals || 0));
+                const price = payload?.payload?.price || 0;
+                const tickPrice = payload?.payload?.tickPrice || 0;
+
                 return [
                   <>
                     <div className="text-gray-500">
                       PnL: {formatePercentage(value)}
+                    </div>
+                    <div className="text-gray-500">
+                      Spot Price: {formatNumberWithDecimals(tickPrice)}x
                     </div>
                     <div className="text-gray-500">
                       Short Price: {formatNumberWithDecimals(price)}x

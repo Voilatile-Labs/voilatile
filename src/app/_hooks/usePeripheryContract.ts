@@ -5,15 +5,37 @@ import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
 import { config } from "@/app/_containers/wallet-provider";
 import { toast } from "@/hooks/use-toast";
 import { tickToPrice } from "@/utils/currency";
+import { data as Tokens } from "@/constants/token";
 
 export const usePeripheryContract = (contract: string) => {
-  const { data } = useReadContracts({
+  const { data: peripheryData } = useReadContracts({
     contracts: [
       {
         address: contract as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "feeTier",
       },
+      {
+        address: contract as `0x${string}`,
+        abi: VoilatilePeripheryABI,
+        functionName: "fetchATM",
+      },
+    ],
+  });
+
+  const { feeTier, atm } = useMemo(() => {
+    return {
+      feeTier: peripheryData?.[0]?.result
+        ? Number(peripheryData[0].result)
+        : undefined,
+      atm: peripheryData?.[1]?.result
+        ? Number(peripheryData[1].result)
+        : undefined,
+    };
+  }, [peripheryData]);
+
+  const { data: tokens } = useReadContracts({
+    contracts: [
       {
         address: contract as `0x${string}`,
         abi: VoilatilePeripheryABI,
@@ -24,22 +46,22 @@ export const usePeripheryContract = (contract: string) => {
         abi: VoilatilePeripheryABI,
         functionName: "quoteToken",
       },
-      {
-        address: contract as `0x${string}`,
-        abi: VoilatilePeripheryABI,
-        functionName: "fetchATM",
-      },
     ],
   });
 
-  const { feeTier, pToken, qToken, atm } = useMemo(() => {
+  const { pToken, qToken } = useMemo(() => {
+    if (!tokens) {
+      return { pToken: undefined, qToken: undefined };
+    }
+
+    const pToken = Tokens.find((x) => x.contractAddress === tokens[0].result);
+    const qToken = Tokens.find((x) => x.contractAddress === tokens[1].result);
+
     return {
-      feeTier: data?.[0]?.result ? Number(data[0].result) : undefined,
-      pToken: data?.[1]?.result ? String(data[1].result) : undefined,
-      qToken: data?.[2]?.result ? String(data[2].result) : undefined,
-      atm: data?.[3]?.result ? Number(data[3].result) : undefined,
+      pToken,
+      qToken,
     };
-  }, [data]);
+  }, [tokens]);
 
   const getCalculatedLongPrices = async (tickIndexes: number[]) => {
     if (!atm) return [];
