@@ -25,6 +25,7 @@ import { VoilatilePeripheryABI } from "@/constants/abi/voilatile_periphery";
 import { erc20Abi } from "viem";
 import { Token } from "@/constants/token";
 import { useRouter } from "next/navigation";
+import useGlobalStore, { Position } from "@/stores/global/global-store";
 
 const OpenLiquidityPosition = () => {
   const router = useRouter();
@@ -35,6 +36,8 @@ const OpenLiquidityPosition = () => {
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
   const [updateAllowance, setUpdateAllowance] = useState("");
+
+  const { setManagePosition } = useGlobalStore();
 
   const { atm } = usePeripheryContract(
     process.env.NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as string
@@ -172,18 +175,18 @@ const OpenLiquidityPosition = () => {
       return;
     }
 
-    if (!longTokenAmount.rawAmount) {
-      toast({
-        title: "Amount Required",
-        description: "Please enter the amount you want to trade",
-      });
-      return;
-    }
-
     const tickDistance = endTick - startTick;
 
     let amount = 0;
     if (n === 0) {
+      if (!shortTokenAmount.rawAmount) {
+        toast({
+          title: "Amount Required",
+          description: "Please enter the amount you want to trade",
+        });
+        return;
+      }
+
       const lowerTicks = Array.from(
         { length: Math.floor((endTick - startTick) / TICK_SPACE) + 1 },
         (_, i) => startTick + i * TICK_SPACE
@@ -193,10 +196,28 @@ const OpenLiquidityPosition = () => {
         shortTokenAmount.rawAmount /
         lowerTicks.reduce((acc, t) => acc + tickToPrice(t), 0);
     } else if (m === 0) {
+      if (!longTokenAmount.rawAmount) {
+        toast({
+          title: "Amount Required",
+          description: "Please enter the amount you want to trade",
+        });
+        return;
+      }
+
       amount =
         longTokenAmount.rawAmount / (Math.floor(tickDistance / TICK_SPACE) + 1);
     } else {
-      amount = longTokenAmount.rawAmount / (Math.floor(n / TICK_SPACE) + 1);
+      if (!longTokenAmount.rawAmount) {
+        toast({
+          title: "Amount Required",
+          description: "Please enter the amount you want to trade",
+        });
+        return;
+      }
+
+      amount =
+        longTokenAmount.rawAmount /
+        (Math.floor((endTick - atm) / TICK_SPACE) + 1);
     }
 
     return {
@@ -429,7 +450,9 @@ const OpenLiquidityPosition = () => {
 
             if (data.type === "position") {
               reset(initialState);
-              router.push("/positions");
+
+              setManagePosition(Position.Liquidity);
+              router.push("/positions/manage");
             }
           }}
           onClose={() => {

@@ -308,9 +308,9 @@ export const VoilatilePeripheryABI = [
   {
     inputs: [
       {
-        internalType: "bytes32",
+        internalType: "uint256",
         name: "positionId",
-        type: "bytes32",
+        type: "uint256",
       },
     ],
     name: "extend",

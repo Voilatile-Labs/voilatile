@@ -21,6 +21,7 @@ import { tokenAmountToDecimal } from "@/utils/currency";
 import { tickToPrice } from "@/utils/currency";
 import { defaultShortToken } from "@/constants/token";
 import { useRouter } from "next/navigation";
+import useGlobalStore, { Position } from "@/stores/global/global-store";
 
 const OpenShortPosition = () => {
   const router = useRouter();
@@ -29,6 +30,8 @@ const OpenShortPosition = () => {
   const { address } = useAccount();
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const { setManagePosition } = useGlobalStore();
 
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
@@ -277,7 +280,9 @@ const OpenShortPosition = () => {
 
             if (data.type === "position") {
               reset(initialState);
-              router.push("/positions");
+
+              setManagePosition(Position.Short);
+              router.push("/positions/manage");
             }
           }}
           onClose={() => {

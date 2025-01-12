@@ -20,6 +20,7 @@ import useLongPositionStore, {
   initialState,
 } from "@/stores/global/long-position-store";
 import { useRouter } from "next/navigation";
+import useGlobalStore, { Position } from "@/stores/global/global-store";
 
 const OpenPosition = () => {
   const router = useRouter();
@@ -28,6 +29,8 @@ const OpenPosition = () => {
   const { address } = useAccount();
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const { setManagePosition } = useGlobalStore();
 
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
   const [transactionData, setTransactionData] = useState<any>(null);
@@ -280,7 +283,9 @@ const OpenPosition = () => {
 
             if (data.type === "position") {
               reset({ ...initialState, step: CreateLongPosition.OpenPosition });
-              router.push("/positions");
+
+              setManagePosition(Position.Long);
+              router.push("/positions/manage");
             }
           }}
           onClose={() => {

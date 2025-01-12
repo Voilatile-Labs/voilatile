@@ -51,7 +51,7 @@ const PositionCard = ({
           .NEXT_PUBLIC_VOILATILE_CONTRACT_ADDRESS as `0x${string}`,
         abi: VoilatilePeripheryABI,
         functionName: "extend",
-        args: [`0x${position.id.toString(16).padStart(64, "0")}`],
+        args: [position.id],
       },
       title: "Extend Position",
       description: "Are you sure you want to extend this position?",
