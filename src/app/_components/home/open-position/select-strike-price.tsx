@@ -234,7 +234,7 @@ const SelectStrikePrice = () => {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
-            margin={{ bottom: 20 }}
+            margin={{ bottom: 8 }}
             onClick={handleChartClick}
           >
             <XAxis
@@ -243,16 +243,10 @@ const SelectStrikePrice = () => {
                 value: XAxisLabel,
                 position: "bottom",
                 fontSize: 12,
-                offset: -4,
+                offset: -16,
               }}
               domain={["auto", "auto"]}
-              tick={{ fontSize: 11 }}
-              tickFormatter={(tick) => {
-                const data = chartData.find((x) => x.tick === tick);
-                const tickPrice = data?.tickPrice || 0;
-
-                return formatNumberWithDecimals(tickPrice);
-              }}
+              tick={false}
             />
 
             <YAxis
@@ -280,7 +274,7 @@ const SelectStrikePrice = () => {
                       PnL: {formatePercentage(value)}
                     </div>
                     <div className="text-gray-500">
-                      Spot Price: {formatNumberWithDecimals(tickPrice)}x
+                      Spot Price: {formatNumberWithDecimals(tickPrice)}
                     </div>
                     <div className="text-gray-500">
                       Long Price: {formatNumberWithDecimals(price)}x
