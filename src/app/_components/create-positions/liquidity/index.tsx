@@ -196,7 +196,7 @@ const OpenLiquidityPosition = () => {
       amount =
         longTokenAmount.rawAmount / (Math.floor(tickDistance / TICK_SPACE) + 1);
     } else {
-      amount = longTokenAmount.rawAmount / Math.floor(n / TICK_SPACE);
+      amount = longTokenAmount.rawAmount / (Math.floor(n / TICK_SPACE) + 1);
     }
 
     return {
