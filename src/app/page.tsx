@@ -59,7 +59,7 @@ const Home = ({}: HomeProps) => {
         )}
 
         {step === CreateLongPosition.SelectToken && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[1000px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-[1000px]">
             <AboutUs />
 
             <ScheduleCall />

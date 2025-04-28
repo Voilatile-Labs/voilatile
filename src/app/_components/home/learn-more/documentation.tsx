@@ -12,7 +12,7 @@ const Documentation = () => {
       id="documentation"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="rounded-3xl bg-green-100 p-6 flex flex-col items-start gap-4 col-span-2"
+      className="rounded-3xl bg-green-100 p-6 flex flex-col items-start gap-4 col-span-1 sm:col-span-2"
     >
       <motion.div className="flex items-center gap-2 bg-white rounded-full px-4 py-2">
         <motion.span
