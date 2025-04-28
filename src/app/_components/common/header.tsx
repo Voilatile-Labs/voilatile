@@ -5,7 +5,7 @@ import { useAccount } from "wagmi";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAccountModal, useConnectModal } from "@rainbow-me/rainbowkit";
-import { Menu } from "lucide-react";
+import { Menu, Triangle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +21,38 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import GithubIcon from "@/assets/icons/github";
+import TwitterIcon from "@/assets/icons/twitter";
+import DiscordIcon from "@/assets/icons/discord";
+import { socialIconHoverAnimation } from "./footer";
+
+const PageLinks = [
+  {
+    label: "Company",
+    href: "company",
+    item: [
+      {
+        label: "About us",
+        href: "#about-us",
+      },
+      {
+        label: "Schedule a call",
+        href: "#schedule-call",
+      },
+    ],
+  },
+  {
+    label: "Protocol",
+    href: "protocol",
+    item: [
+      {
+        label: "Documentation",
+        href: "#documentation",
+      },
+    ],
+  },
+];
 
 const Links = [
   {
@@ -53,16 +85,70 @@ export const Header = () => {
   return (
     <nav className="flex items-center justify-between px-4 sm:px-6 py-4">
       <div className="flex items-center">
-        <Link href="/">
-          <div className="relative items-center w-32 h-8 flex justify-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/assets/images/logo.gif"
-              alt="logo"
-              className="absolute mt-4"
-            />
-          </div>
-        </Link>
+        <div>
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-2">
+                <Link href="/">
+                  <div className="relative items-center w-32 h-8 flex justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/assets/images/logo.gif"
+                      alt="logo"
+                      className="absolute mt-4"
+                    />
+                  </div>
+                </Link>
+                <Triangle className="w-2 h-2 transform rotate-180 fill-gray-400 hover:fill-black transition-all duration-300" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent
+              align="start"
+              className="p-4 sm:p-4 shadow-none sm:shadow-none"
+            >
+              <ul className="flex flex-col gap-4 min-w-40">
+                {PageLinks.map((item) => (
+                  <li key={item.label}>
+                    <p className="text-black text-sm font-medium">
+                      {item.label}
+                    </p>
+                    <ul className="flex flex-col gap-2 mt-2">
+                      {item.item?.map((element) => (
+                        <Link
+                          key={element.label}
+                          href={element.href}
+                          className={cn("text-gray-500 hover:text-gray-900")}
+                        >
+                          {element.label}
+                        </Link>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex items-center gap-4 mt-5">
+                <motion.a
+                  href="#"
+                  aria-label="GitHub"
+                  {...socialIconHoverAnimation}
+                >
+                  <GithubIcon className="w-[22px] h-[22px] hover:fill-blue-500" />
+                </motion.a>
+                <motion.a href="#" aria-label="X" {...socialIconHoverAnimation}>
+                  <TwitterIcon className="w-[20px] h-[20px] hover:fill-blue-500" />
+                </motion.a>
+                <motion.a
+                  href="#"
+                  aria-label="Discord"
+                  {...socialIconHoverAnimation}
+                >
+                  <DiscordIcon className="w-[20px] h-[20px] hover:fill-blue-500" />
+                </motion.a>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
 
         <ul className="items-center gap-4 ml-9 hidden md:flex">
           {Links.map((link) =>
