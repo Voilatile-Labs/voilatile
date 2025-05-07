@@ -24,13 +24,20 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import GithubIcon from "@/assets/icons/github";
 import TwitterIcon from "@/assets/icons/twitter";
-import DiscordIcon from "@/assets/icons/discord";
+// import DiscordIcon from "@/assets/icons/discord";
 import { socialIconHoverAnimation } from "./footer";
 
-const PageLinks = [
+const PageLinks: {
+  label?: string;
+  href?: string;
+  item: {
+    label: string;
+    href: string;
+  }[];
+}[] = [
   {
-    label: "Company",
-    href: "company",
+    // label: "Company",
+    // href: "company",
     item: [
       {
         label: "About us",
@@ -43,8 +50,8 @@ const PageLinks = [
     ],
   },
   {
-    label: "Protocol",
-    href: "protocol",
+    // label: "Protocol",
+    // href: "protocol",
     item: [
       {
         label: "Documentation",
@@ -106,13 +113,15 @@ export const Header = () => {
               align="start"
               className="p-4 sm:p-4 shadow-none sm:shadow-none"
             >
-              <ul className="flex flex-col gap-4 min-w-40">
+              <ul className="flex flex-col gap-2 min-w-40">
                 {PageLinks.map((item) => (
                   <li key={item.label}>
-                    <p className="text-black text-sm font-medium">
-                      {item.label}
-                    </p>
-                    <ul className="flex flex-col gap-2 mt-2">
+                    {item.label && (
+                      <p className="text-black text-sm font-medium mb-2">
+                        {item.label}
+                      </p>
+                    )}
+                    <ul className="flex flex-col gap-2">
                       {item.item?.map((element) => (
                         <Link
                           key={element.label}
@@ -129,22 +138,30 @@ export const Header = () => {
 
               <div className="flex items-center gap-4 mt-5">
                 <motion.a
-                  href="#"
+                  href="https://github.com/Voilatile-Labs"
                   aria-label="GitHub"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   {...socialIconHoverAnimation}
                 >
                   <GithubIcon className="w-[22px] h-[22px] hover:fill-blue-500" />
                 </motion.a>
-                <motion.a href="#" aria-label="X" {...socialIconHoverAnimation}>
+                <motion.a
+                  href="https://x.com/VoilatileLabs"
+                  aria-label="X"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  {...socialIconHoverAnimation}
+                >
                   <TwitterIcon className="w-[20px] h-[20px] hover:fill-blue-500" />
                 </motion.a>
-                <motion.a
+                {/* <motion.a
                   href="#"
                   aria-label="Discord"
                   {...socialIconHoverAnimation}
                 >
                   <DiscordIcon className="w-[20px] h-[20px] hover:fill-blue-500" />
-                </motion.a>
+                </motion.a> */}
               </div>
             </TooltipContent>
           </Tooltip>
@@ -205,7 +222,7 @@ export const Header = () => {
         {address ? (
           <Button
             onClick={openAccountModal}
-            className="rounded-full bg-transparent text-black hover:bg-gray-50 border border-gray-200"
+            className="rounded-full bg-transparent text-black hover:bg-gray-50 border border-gray-200 px-3"
           >
             <Image
               src="/assets/images/wallet.svg"
@@ -226,7 +243,7 @@ export const Header = () => {
               <Menu className="h-6 w-6" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl">
+          <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl px-2">
             <SheetHeader>
               <SheetTitle>Menu</SheetTitle>
             </SheetHeader>

@@ -2,7 +2,7 @@
 
 import GithubIcon from "@/assets/icons/github";
 import TwitterIcon from "@/assets/icons/twitter";
-import DiscordIcon from "@/assets/icons/discord";
+// import DiscordIcon from "@/assets/icons/discord";
 import React from "react";
 import { motion } from "framer-motion";
 
@@ -16,81 +16,81 @@ export const socialIconHoverAnimation = {
   animate: { rotate: 0 },
 };
 
-const Links = [
-  {
-    label: "App",
-    href: "app",
-    item: [
-      {
-        label: "Trade",
-        href: "#trade",
-      },
-      {
-        label: "Explore",
-        href: "#explore",
-      },
-      {
-        label: "Pool",
-        href: "#pool",
-      },
-    ],
-  },
-  {
-    label: "Company",
-    href: "company",
-    item: [
-      {
-        label: "Careers",
-        href: "#careers",
-      },
-      {
-        label: "Blog",
-        href: "#blog",
-      },
-      {
-        label: "Brand assets",
-        href: "#brand-assets",
-      },
-    ],
-  },
-  {
-    label: "Protocol",
-    href: "protocol",
-    item: [
-      {
-        label: "Vote",
-        href: "#vote",
-      },
-      {
-        label: "Governance",
-        href: "#governance",
-      },
-      {
-        label: "Developers",
-        href: "#developers",
-      },
-    ],
-  },
-  {
-    label: "Need help?",
-    href: "need-help",
-    item: [
-      {
-        label: "Help center",
-        href: "#help-center",
-      },
-      {
-        label: "Contact us",
-        href: "#contact-us",
-      },
-    ],
-  },
-];
+// const Links = [
+//   {
+//     label: "App",
+//     href: "app",
+//     item: [
+//       {
+//         label: "Trade",
+//         href: "#trade",
+//       },
+//       {
+//         label: "Explore",
+//         href: "#explore",
+//       },
+//       {
+//         label: "Pool",
+//         href: "#pool",
+//       },
+//     ],
+//   },
+//   {
+//     label: "Company",
+//     href: "company",
+//     item: [
+//       {
+//         label: "Careers",
+//         href: "#careers",
+//       },
+//       {
+//         label: "Blog",
+//         href: "#blog",
+//       },
+//       {
+//         label: "Brand assets",
+//         href: "#brand-assets",
+//       },
+//     ],
+//   },
+//   {
+//     label: "Protocol",
+//     href: "protocol",
+//     item: [
+//       {
+//         label: "Vote",
+//         href: "#vote",
+//       },
+//       {
+//         label: "Governance",
+//         href: "#governance",
+//       },
+//       {
+//         label: "Developers",
+//         href: "#developers",
+//       },
+//     ],
+//   },
+//   {
+//     label: "Need help?",
+//     href: "need-help",
+//     item: [
+//       {
+//         label: "Help center",
+//         href: "#help-center",
+//       },
+//       {
+//         label: "Contact us",
+//         href: "#contact-us",
+//       },
+//     ],
+//   },
+// ];
 
 const Footer = () => {
   return (
     <footer className="w-full p-6 pt-10 text-sm">
-      <div className="flex flex-end">
+      {/* <div className="flex flex-end">
         <div className="flex flex-col sm:flex-row flex-1 justify-end gap-4 sm:gap-12 flex-wrap">
           {Links.map((link) => {
             return (
@@ -107,21 +107,33 @@ const Footer = () => {
             );
           })}
         </div>
-      </div>
+      </div> */}
 
       <div className="flex items-center justify-between mt-8 border-t border-gray-100 pt-4 text-xs text-gray-600">
-        <div className="mb-2 md:mb-0">© 2024 - Voilatile</div>
+        <div className="mb-2 md:mb-0">© 2025 - Voilatile</div>
 
         <div className="flex items-center gap-4 mb-4 md:mb-0">
-          <motion.a href="#" aria-label="GitHub" {...socialIconHoverAnimation}>
+          <motion.a
+            href="https://github.com/Voilatile-Labs"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
+            {...socialIconHoverAnimation}
+          >
             <GithubIcon className="w-[22px] h-[22px] hover:fill-blue-500" />
           </motion.a>
-          <motion.a href="#" aria-label="X" {...socialIconHoverAnimation}>
+          <motion.a
+            href="https://x.com/VoilatileLabs"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="X"
+            {...socialIconHoverAnimation}
+          >
             <TwitterIcon className="w-[20px] h-[20px] hover:fill-blue-500" />
           </motion.a>
-          <motion.a href="#" aria-label="Discord" {...socialIconHoverAnimation}>
+          {/* <motion.a href="#" aria-label="Discord" {...socialIconHoverAnimation}>
             <DiscordIcon className="w-[20px] h-[20px] hover:fill-blue-500" />
-          </motion.a>
+          </motion.a> */}
         </div>
       </div>
     </footer>

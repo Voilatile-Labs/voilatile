@@ -12,9 +12,9 @@ const AboutUs = () => {
       id="about-us"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="rounded-3xl bg-blue-50 p-6 flex flex-col items-start gap-4"
+      className="rounded-3xl  p-6 flex flex-col items-start gap-4 border border-[#9747ff] bg-white"
     >
-      <motion.div className="flex items-center gap-2 bg-white rounded-full px-4 py-2">
+      <motion.div className="flex items-center gap-2 bg-[#efe3ff] rounded-full px-4 py-2">
         <motion.span
           animate={
             hovered ? { width: 0, opacity: 0 } : { width: 16, opacity: 1 }
